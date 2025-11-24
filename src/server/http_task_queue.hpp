@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2025 Kevin Daniel Taylor
+ * Licensed under the MIT License (see the LICENSE file in the project root).
+ */
 #ifndef http_task_queue_hpp
 #define http_task_queue_hpp
 

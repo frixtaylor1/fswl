@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2025 Kevin Daniel Taylor
+ * Licensed under the MIT License (see the LICENSE file in the project root).
+ */
 #ifndef ansi_string_hpp
 #define ansi_string_hpp
 
@@ -37,7 +41,7 @@ struct AnsiString {
     bool        operator == (const AnsiString& rhs);
     bool        operator != (const AnsiString& rhs);
     int         pos(const char& item) const;
-    int         pos(const char* plainString) const;
+    int         pos(const char* pattern) const;
     int         pos(AnsiString& string) const;
     uint        length(void) const;
     bool        greatherThan(const AnsiString& rhs) const;
@@ -62,7 +66,7 @@ struct AnsiString {
     template <typename... Args>
     static AnsiString format(const char* str, Args&& ...args);
 
-    void              kmpBuildPartialMatchTable(const char* pattern, int partialMatch[]) const;
+    void              initKmpPartialMatchTable(const char* pattern, int partialMatch[]) const;
     Collection< int > ocurrencesOf(AnsiString& pattern);
 
     uint size(void) const;
@@ -143,32 +147,29 @@ int AnsiString< STR_CAPACITY >::pos(const char& item) const {
 }
 
 template< uint STR_CAPACITY >
-int AnsiString< STR_CAPACITY >::pos(const char* plainString) const {
+int AnsiString< STR_CAPACITY >::pos(const char* pattern) const {
     SA_ASSERT(content.initialized, "String not initialized!");
 
-    /**
-     * Knuth Morris Pratt algorithm
-     */
-    uint patternLength = strlen(plainString);
+    uint patternLength = strlen(pattern);
     if (patternLength == 0) return -1;
 
     uint stringLength = length();
     int partialMatch[patternLength];
 
-    kmpBuildPartialMatchTable(plainString, partialMatch);
+    initKmpPartialMatchTable(pattern, partialMatch);
 
-    int currentStringCharacter = 0;
-    int currentPatternCharacter = 0;
-    while (currentStringCharacter < (int) stringLength) {
-        if (currentPatternCharacter == -1) {
-            currentStringCharacter++;
-            currentPatternCharacter = 0;
-        } else if (at(currentStringCharacter) == plainString[currentPatternCharacter]) {
-            currentStringCharacter++;
-            currentPatternCharacter++;
-            if (currentPatternCharacter == (int) patternLength) return currentStringCharacter - currentPatternCharacter;
+    int currentStrChar  = 0;
+    int currentPatChar = 0;
+    while (currentStrChar < (int) stringLength) {
+        if (currentPatChar == -1) {
+            currentStrChar++;
+            currentPatChar = 0;
+        } else if (at(currentStrChar) == pattern[currentPatChar]) {
+            currentStrChar++;
+            currentPatChar++;
+            if (currentPatChar == (int) patternLength) return currentStrChar - currentPatChar;
         } else {
-            currentPatternCharacter = partialMatch[currentPatternCharacter];
+            currentPatChar = partialMatch[currentPatChar];
         }
     }
 
@@ -314,28 +315,22 @@ AnsiString< STR_CAPACITY > AnsiString< STR_CAPACITY >::format(const char* str, A
 }
 
 template< uint STR_CAPACITY >
-void AnsiString< STR_CAPACITY >::kmpBuildPartialMatchTable(const char* pattern, int partialMatch[]) const {
-    /**
-     * Knuth Morris Pratt algorithm, partial match table...
-     */
+void AnsiString< STR_CAPACITY >::initKmpPartialMatchTable(const char* pattern, int partialMatch[]) const {
     uint patternLength = strlen(pattern);
-    int currentPatternCharacter = 0;
+    int currentPatChar = 0;
     partialMatch[0] = -1;
     for (uint i = 1; i < patternLength; i++) {
-        currentPatternCharacter = partialMatch[ i - 1];
-        while (currentPatternCharacter >= 0) {
-            if (pattern[currentPatternCharacter] == pattern[i - 1]) break;
-            else currentPatternCharacter = partialMatch[currentPatternCharacter];
+        currentPatChar = partialMatch[ i - 1];
+        while (currentPatChar >= 0) {
+            if (pattern[currentPatChar] == pattern[i - 1]) break;
+            else currentPatChar = partialMatch[currentPatChar];
         }
-        partialMatch[i] = currentPatternCharacter + 1;
+        partialMatch[i] = currentPatChar + 1;
     }
 }
 
 template< uint STR_CAPACITY >
 Collection< int > AnsiString<STR_CAPACITY>::ocurrencesOf(AnsiString& pattern) {
-    /**
-     * Knuth Morris Pratt algorithm
-     */
     int stringLength = length();
     int patternLength = pattern.length();
 
@@ -343,27 +338,24 @@ Collection< int > AnsiString<STR_CAPACITY>::ocurrencesOf(AnsiString& pattern) {
     
     if (patternLength != 0 || stringLength != 0) {
         int partialMatch[patternLength];
-        kmpBuildPartialMatchTable(pattern.cstr(), partialMatch);
-        /**
-         * Search phase...
-         */
-        int currentStringCharacter = 0;
-        int currentPatternCharacter = 0;
-        int matches = 0;
-        while (currentStringCharacter < stringLength) {
-            if (currentPatternCharacter == -1) {
-                currentPatternCharacter++;
-                currentPatternCharacter = 0;
-            } else if (at(currentStringCharacter) == pattern.at(currentPatternCharacter)) {
-                currentStringCharacter++;
-                currentPatternCharacter++;
-                if (currentPatternCharacter == patternLength) {
-                    ocurrences.add(currentStringCharacter - currentPatternCharacter);
-                    currentPatternCharacter = 0;
+        initKmpPartialMatchTable(pattern.cstr(), partialMatch);
+        int currentStrChar = 0;
+        int currentPatChar = 0;
+        int matches        = 0;
+        while (currentStrChar < stringLength) {
+            if (currentPatChar == -1) {
+                currentPatChar++;
+                currentPatChar = 0;
+            } else if (at(currentStrChar) == pattern.at(currentPatChar)) {
+                currentStrChar++;
+                currentPatChar++;
+                if (currentPatChar == patternLength) {
+                    ocurrences.add(currentStrChar - currentPatChar);
+                    currentPatChar = 0;
                     matches++;
                 }
             } else {
-                currentPatternCharacter = partialMatch[currentPatternCharacter];
+                currentPatChar = partialMatch[currentPatChar];
             }
         }
     }
