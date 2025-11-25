@@ -8,14 +8,6 @@
 #include "common.hpp"
 
 /**
- * Future iterations:
- *   * TODO:
- *     * Implement a custom allocator for heap allocations using a define (dynamic_collection).
- *     * The allocator should behave like a stack-based allocator but operate on the heap:
- *       a single allocation and a single free during the entire program execution.
- */
-
-/**
  * Collection of items...
  */
 template< class ItemType, uint CAPACITY = 128 >

@@ -32,6 +32,7 @@ struct AssociativeContainer {
     ValueType& at(const KeyType& key);
     ValueType& getValue(const KeyType& key);
     KeyType&   end(void);
+    uint       length(void);
 };
 
 template< class KeyType, class ValueType, uint CAPACITY >
@@ -74,16 +75,16 @@ ValueType* AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::value
 
 template< class KeyType, class ValueType, uint CAPACITY >
 ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::add(const KeyType& key, const ValueType& value) {
-    int slot = keys.indexOf(key);
+    int slotIdx = keys.indexOf(key);
  
-    if (slot == -1) {
+    if (slotIdx == -1) {
         keys.add(key);
         uint keyIdx = keys.indexOf(key);
         values.addAt(keyIdx, value);
-        slot = keyIdx; 
+        slotIdx = keyIdx; 
     }
 
-    return values.at(slot);
+    return values.at(slotIdx);
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
@@ -104,6 +105,11 @@ ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const 
 template< class KeyType, class ValueType, uint CAPACITY >
 KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::end(void) {
     return *keys.end().current;
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
+uint AssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) {
+    return keys.length;
 }
 
 #endif // associative_container_hpp

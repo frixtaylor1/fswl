@@ -76,6 +76,7 @@ struct AnsiString {
      */
 
     AnsiString& concat(const char* plainString);
+    AnsiString& concat(const char c);
     AnsiString& concat(AnsiString& string);
     AnsiString& trim(void);
 
@@ -83,8 +84,8 @@ struct AnsiString {
      * Iterator family functions...
      */
 
-    Collection< char >::Iterator begin(void);
-    Collection< char >::Iterator end(void);
+    Collection< char, STR_CAPACITY >::Iterator begin(void);
+    Collection< char, STR_CAPACITY >::Iterator end(void);
 };
 
 typedef AnsiString< 256 > SafeString;
@@ -374,6 +375,12 @@ AnsiString< STR_CAPACITY >& AnsiString< STR_CAPACITY >::concat(const char* plain
 }
 
 template< uint STR_CAPACITY >
+AnsiString< STR_CAPACITY >& AnsiString< STR_CAPACITY >::concat(const char c) {
+    content.add(c);
+    return *this;
+}
+
+template< uint STR_CAPACITY >
 AnsiString< STR_CAPACITY >& AnsiString< STR_CAPACITY >::concat(AnsiString& string) {
     content.add(string.content);
     return *this;
@@ -381,24 +388,32 @@ AnsiString< STR_CAPACITY >& AnsiString< STR_CAPACITY >::concat(AnsiString& strin
 
 template< uint STR_CAPACITY >
 AnsiString< STR_CAPACITY >& AnsiString< STR_CAPACITY >::trim() {
-    SA_ASSERT(false, "MUST IMPLEMENT");
     const unsigned char SPACE_CODE = 32;
 
-    for (auto&& it = begin(); it != end(); ++it) {
-        if ((unsigned char) *it == SPACE_CODE) {
-//                remove(it.currentPos(), 1);
-        }
+    char *start = content.items;
+    char *end   = content.items + length() - 1;
+
+    while ((uint)*start == SPACE_CODE && start++);
+    while (end >= start && ((uint)*end == SPACE_CODE) && end--);
+
+    *(end + 1) = '\0';
+
+    content.length = strlen(start);
+    
+    if (start != content.items) {
+        memmove(content.items, start, length() + 1);
     }
+
     return *this;
 }
 
 template< uint STR_CAPACITY >
-Collection< char >::Iterator AnsiString< STR_CAPACITY >::begin(void) {
+Collection< char, STR_CAPACITY >::Iterator AnsiString< STR_CAPACITY >::begin(void) {
     return content.begin();
 }
 
 template< uint STR_CAPACITY >
-Collection< char >::Iterator AnsiString< STR_CAPACITY >::end(void) {
+Collection< char, STR_CAPACITY >::Iterator AnsiString< STR_CAPACITY >::end(void) {
     return content.end();
 }
 
