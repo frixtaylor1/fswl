@@ -36,20 +36,14 @@ int main() {
 
     Json       json; 
     JsonParser parser(&json, json_input);
-
+    
     if (parser.parse()) {
         const JsonObject& rootObject = json.object;
+
         SA_PRINT("\n Parsed structure \n");
         SA_PRINT("Root Object:\n");
-        JsonValue rootValue;
-        new (&rootValue.content.objectStorage) JsonObject(rootObject); 
-        rootValue.type = JSON_OBJECT;
 
-        rootValue.dump();
-
-        const JsonValue* intentos_val = rootValue.get("nombre");
-        SA_PRINT("%s\n", intentos_val->asString().cstr());
-        rootValue.~JsonValue();
+        SA_PRINT(rootObject.get("nombre")->asString().cstr());
     }
 
     return 0;

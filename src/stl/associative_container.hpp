@@ -30,10 +30,14 @@ struct AssociativeContainer {
     /** Query family functions... */
     bool             exists(const KeyType& key);
     const bool       exists(const KeyType& key) const;
+    const KeyType&   getKeyAt(uint idx) const;
+    KeyType          getKeyAt(uint idx);
     ValueType&       at(const KeyType& key);
     const ValueType& at(const KeyType& key) const;
     ValueType&       getValue(const KeyType& key);
     const ValueType& getValue(const KeyType& key) const;
+    const ValueType& getValueAt(uint idx) const;
+    ValueType        getValueAt(uint idx);
     KeyType&         end(void);
     uint             length(void);
     const uint       length(void) const;
@@ -102,6 +106,16 @@ const bool AssociativeContainer< KeyType, ValueType, CAPACITY >::exists(const Ke
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
+KeyType AssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint idx) {
+    return keys.at(idx);
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
+const KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint idx) const {
+    return keys.at(idx);
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
 ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::at(const KeyType& key) {
     return values.at(keys.indexOf(key));
 }
@@ -119,6 +133,16 @@ ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const 
 template< class KeyType, class ValueType, uint CAPACITY >
 const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const KeyType& key) const {
     return at(key);
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
+const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint idx) const {
+    return values.at(idx);
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
+ValueType AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint idx) {
+    return values.at(idx);
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
