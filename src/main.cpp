@@ -11,6 +11,26 @@ static void handleHello(HttpRequest* req, HttpResponse* res) {
     res->setBody(responseBody.cstr());
 }
 
+static void handlePost(HttpRequest* req, HttpResponse* res) {
+    Json          reqJson;
+    JsonParser jsonParser(&reqJson, req->body.cstr());
+
+    if (!jsonParser.parse()) {
+        SafeString responseBody {"Invalid Json format"};
+        res->setStatus(400, "BadRquest");
+        res->setBody(responseBody.cstr());
+        return;
+    }
+    
+    JsonValue jsonValue;
+    jsonValue.setObject(reqJson.object);
+    
+    SafeString responseBody = SafeString::format("JSON parsed successfully: hello %s");
+    res->setStatus(200, "OK");
+    res->setBody(responseBody.cstr());
+}
+
+
 static void handleStatus(HttpRequest* req, HttpResponse* res) {
     (void) req;
     res->setStatus(200, "OK");  
@@ -18,33 +38,14 @@ static void handleStatus(HttpRequest* req, HttpResponse* res) {
 }
 
 int main() {
-    const char json_input[] = 
-        "{\n"
-        "  \"nombre\": \"ejemplo\",\n"
-        "  \"version\": 1.0,\n"
-        "  \"activo\": true,\n"
-        "  \"configuracion\": {\n"
-        "    \"max_intentos\": 3,\n"
-        "    \"timeout\": 15.5\n"
-        "  },\n"
-        "  \"datos_nulos\": null\n"
-        "}";
+    HttpServer server;
+    server.init(8080);
 
-    SA_PRINT("--- Input JSON ---\n");
-    SA_PRINT("%s\n\n",json_input);
-    SA_PRINT("------------------------------------------------\n");
+    server.router.addRoute("GET", "/", &handleHello);
+    server.router.addRoute("POST", "/something", &handlePost);
+    server.router.addRoute("GET", "/status", &handleStatus);
 
-    Json       json; 
-    JsonParser parser(&json, json_input);
+    server.start();
     
-    if (parser.parse()) {
-        const JsonObject& rootObject = json.object;
-
-        SA_PRINT("\n Parsed structure \n");
-        SA_PRINT("Root Object:\n");
-
-        SA_PRINT(rootObject.get("nombre")->asString().cstr());
-    }
-
     return 0;
 }

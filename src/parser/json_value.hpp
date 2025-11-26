@@ -231,18 +231,49 @@ void JsonValue::setObject(const JsonObject& obj) {
     type = JSON_OBJECT;
     new (&content.objectStorage) JsonObject(obj);
 }
-JsonString JsonValue::serialize(void) const {
+
+JsonString JsonValue::serialize() const {
     switch (type) {
-        case JSON_STRING:
-            return getString();
-        case JSON_NUMBER:
-            return JsonString::toString(content.numberValue);
-        case JSON_BOOL:
-            return content.boolValue ? JsonString("true") : JsonString("false");
         case JSON_NULL:
-            return JsonString("null");
+            return "null";
+
+        case JSON_BOOL:
+            return content.boolValue ? "true" : "false";
+
+        case JSON_NUMBER: {
+            return JsonString::format("%lf", asNumber()); 
+        }
+
+        case JSON_STRING: {
+            JsonString raw = asString(); 
+            JsonString encoded = JsonString::format("\"%s\"", raw.cstr());
+            return encoded; 
+        }
+
+        case JSON_ARRAY: {
+            JsonString result("{");
+            const JsonArray& arr = asArray();
+            for (uint i = 0; i < arr.items.length; ++i) {
+                if (i > 0) result.concat(", ");
+                result.concat(arr.items.items[i]->serialize().cstr()); 
+            }
+            result.concat("}");
+            return result;
+        }
+
+        case JSON_OBJECT: {
+            JsonString result("{");
+            const JsonObject& obj = asObject();
+            
+            /** @TODO: MUST IMPLEMENT */
+
+            bool first = true;
+            
+            result.concat("}");
+            return result;
+        }
         default:
-            return JsonString("");
+            return JsonString("null");
     }
 }
 

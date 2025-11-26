@@ -212,7 +212,17 @@ void HttpServer::_handleConnection(int clientSocket) {
     HttpRequest  req;
     HttpResponse res;
 
-    /** parse logic  */
+    const char* bodyStart = strstr(buffer, "\r\n\r\n");
+    
+    if (bodyStart) {
+        const char* rawBody = bodyStart + 4;
+        size_t bodyLength = bytesRead - (rawBody - buffer); 
+
+        if (bodyLength > 0) {
+            req.body.init(rawBody, bodyLength); 
+        }
+    }
+
     char* line = strtok(buffer, "\r\n");
     if (line) {
         char* token = strtok(line, " ");
@@ -224,7 +234,12 @@ void HttpServer::_handleConnection(int clientSocket) {
     }
     
     /** 
-     * Routing 
+     * @TODO: The rest of the `line` tokenization would need to handle headers like 
+     * "Content-Length: 123" to know the exact body size, for a robust solution.
+     */
+
+    /**
+     *  Routing 
      */
     router.routeRequest(&req, &res);
     

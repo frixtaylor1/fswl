@@ -408,7 +408,6 @@ template< class ItemType, uint CAPACITY >
 const int Collection< ItemType, CAPACITY >::indexOf(const ItemType& item) const {
     for (int idx = 0; idx < length; idx++) {
         if (items[idx] == item) return idx;
-
     }
     return -1;
 }
