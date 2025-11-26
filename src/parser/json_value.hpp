@@ -2,7 +2,6 @@
 #define json_value_hpp
 
 #include "json_types.hpp"
-#include <cstddef>
 #include <new>
 
 struct JsonValue {
@@ -12,9 +11,9 @@ struct JsonValue {
         double numberValue;
         bool   boolValue;
 
-        alignas(JsonString)  std::byte stringStorage[sizeof(JsonString)];
-        alignas(JsonObject)  std::byte objectStorage[sizeof(JsonObject)];
-        alignas(JsonArray)   std::byte arrayStorage[sizeof(JsonArray)];
+        alignas(JsonString) char stringStorage[sizeof(JsonString)];
+        alignas(JsonObject) char objectStorage[sizeof(JsonObject)];
+        alignas(JsonArray)  char arrayStorage[sizeof(JsonArray)];
 
         Content() {} 
         ~Content() {}
