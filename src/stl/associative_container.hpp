@@ -28,11 +28,15 @@ struct AssociativeContainer {
     ValueType& add(const KeyType& key, const ValueType& value);
 
     /** Query family functions... */
-    bool       exists(const KeyType& key);
-    ValueType& at(const KeyType& key);
-    ValueType& getValue(const KeyType& key);
-    KeyType&   end(void);
-    uint       length(void);
+    bool             exists(const KeyType& key);
+    const bool       exists(const KeyType& key) const;
+    ValueType&       at(const KeyType& key);
+    const ValueType& at(const KeyType& key) const;
+    ValueType&       getValue(const KeyType& key);
+    const ValueType& getValue(const KeyType& key) const;
+    KeyType&         end(void);
+    uint             length(void);
+    const uint       length(void) const;
 };
 
 template< class KeyType, class ValueType, uint CAPACITY >
@@ -93,12 +97,27 @@ bool AssociativeContainer< KeyType, ValueType, CAPACITY >::exists(const KeyType&
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
+const bool AssociativeContainer< KeyType, ValueType, CAPACITY >::exists(const KeyType& key) const {
+    return keys.indexOf(key) != -1;
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
 ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::at(const KeyType& key) {
     return values.at(keys.indexOf(key));
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
+const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::at(const KeyType& key) const {
+    return values.at(keys.indexOf(key));
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
 ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const KeyType& key) {
+    return at(key);
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
+const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const KeyType& key) const {
     return at(key);
 }
 
@@ -109,6 +128,11 @@ KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::end(void) {
 
 template< class KeyType, class ValueType, uint CAPACITY >
 uint AssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) {
+    return keys.length;
+}
+
+template< class KeyType, class ValueType, uint CAPACITY >
+const uint AssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) const {
     return keys.length;
 }
 

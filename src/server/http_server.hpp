@@ -23,15 +23,12 @@ struct HttpServer {
     int          threadCount;
 
     void         init(int p);
-    void start(void);
-
-    void _handleAcceptError(int clientSocket, int &retFlag);
-
-    void         cleanup();
+    void         start(void);
     
-    static void* workerRoutine(void* arg);
-    void         handleConnection(int clientSocket);
-    
+    static void* _workerRoutine(void* arg);
+    void         _handleConnection(int clientSocket);
+    void         _cleanup();
+    void         _handleAcceptError(int clientSocket, int &retFlag);
     void         _setupStart(sockaddr_in &serverAddr, bool &retFlag);
     void         _initServerAddress(struct sockaddr_in& serverAddr);
     void         _listen(bool &retFlag);
@@ -83,7 +80,7 @@ void HttpServer::start(void) {
         }
     }
 
-    cleanup();
+    _cleanup();
 }
 
 void HttpServer::_handleAcceptError(int clientSocket, int &retFlag) {
@@ -100,7 +97,6 @@ void HttpServer::_handleAcceptError(int clientSocket, int &retFlag) {
         }
         else if (currentErrno == EBADF) {
             /** If EBADF occurs here, is a fatal error. (the socket was closed outside the loop) */
-            SA_PRINT_ERR("Accept Error: Invalid listen file descriptor (EBADF). Terminated.\n");
             {
                 retFlag = 2;
                 return;
@@ -163,7 +159,7 @@ void HttpServer::_recicleAddress() {
 }
 
 /** member function that executes each thread worker... */
-void* HttpServer::workerRoutine(void* arg) {
+void* HttpServer::_workerRoutine(void* arg) {
     HttpServer* server = (HttpServer*) arg;
     int clientSocket;
     
@@ -174,14 +170,14 @@ void* HttpServer::workerRoutine(void* arg) {
         
         if (clientSocket > 0) {
             /** handle the connection if there is a task */
-            server->handleConnection(clientSocket);
-            /** the socket is closed inside of handleConnection */
+            server->_handleConnection(clientSocket);
+            /** the socket is closed inside of _handleConnection */
         }
     }
     return NULL;
 }
 
-void HttpServer::cleanup() {
+void HttpServer::_cleanup() {
     close(listenSocket);
     taskQueue.destroy();
 }
@@ -195,14 +191,14 @@ void HttpServer::_initServerAddress(struct sockaddr_in& serverAddr) {
 
 void HttpServer::_startThreadPool() {
     for (int i = 0; i < threadCount; i++) {
-        if (pthread_create(&threadPool[i], NULL, HttpServer::workerRoutine, (void*) this) != 0) {
+        if (pthread_create(&threadPool[i], NULL, HttpServer::_workerRoutine, (void*) this) != 0) {
             perror("Error creating worker thread.");
             /** Error handler... */
         }
     }
 }
 
-void HttpServer::handleConnection(int clientSocket) {
+void HttpServer::_handleConnection(int clientSocket) {
     char buffer[4096];
     ssize_t bytesRead;
     

@@ -23,6 +23,7 @@ struct Collection {
         uint      pos;
         
         Iterator(ItemType* item);
+        Iterator(const ItemType* item);
 
         Collection<ItemType, CAPACITY>::Iterator& next(void);
         const Collection<ItemType, CAPACITY>::Iterator& prev(void);
@@ -49,9 +50,11 @@ struct Collection {
         bool      operator >= (const Iterator& other) const;
     };
     
-    Iterator begin(uint idx = 0);
-    Iterator end(void);
-    Iterator end(uint idx);    
+    Iterator       begin(uint idx = 0);
+    const Iterator begin(void) const;
+    Iterator       end(void);
+    Iterator       end(uint idx);
+    const Iterator end(void) const;
     
     Collection();
     Collection(const Collection< ItemType, CAPACITY >& collection); 
@@ -75,6 +78,7 @@ struct Collection {
     bool              operator == (const Collection& rhs) const;
     bool              operator != (const Collection& rhs);
     int               indexOf(const ItemType& item);
+     const int         indexOf(const ItemType& item) const;
     
     /**
      * Modify family functions...
@@ -210,7 +214,17 @@ Collection< ItemType, CAPACITY >::Iterator Collection< ItemType, CAPACITY >::beg
 }
 
 template< class ItemType, uint CAPACITY >
+const Collection< ItemType, CAPACITY >::Iterator Collection< ItemType, CAPACITY >::begin(void) const {
+    return Collection< ItemType, CAPACITY >::Iterator(&items[0]); 
+}
+
+template< class ItemType, uint CAPACITY >
 Collection< ItemType, CAPACITY >::Iterator Collection< ItemType, CAPACITY >::end(void) { 
+    return Collection< ItemType, CAPACITY >::Iterator(&items[length]); 
+}
+
+template< class ItemType, uint CAPACITY >
+const Collection< ItemType, CAPACITY >::Iterator Collection< ItemType, CAPACITY >::end(void) const {
     return Collection< ItemType, CAPACITY >::Iterator(&items[length]); 
 }
 
@@ -386,6 +400,15 @@ template< class ItemType, uint CAPACITY >
 int Collection< ItemType, CAPACITY >::indexOf(const ItemType& item) {
     for (auto&& it = begin(); it != end(); ++it) {
         if (*it == item) return it.currentPos();
+    }
+    return -1;
+}
+
+template< class ItemType, uint CAPACITY >
+const int Collection< ItemType, CAPACITY >::indexOf(const ItemType& item) const {
+    for (int idx = 0; idx < length; idx++) {
+        if (items[idx] == item) return idx;
+
     }
     return -1;
 }

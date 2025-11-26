@@ -5,6 +5,10 @@
 #ifndef static_collection_hpp
 #define static_collection_hpp
 
+#ifndef common_hpp
+#    include "common.hpp"
+#endif // common_hpp
+
 #ifndef ansi_string_hpp
 #    include "ansi_string.hpp"
 #endif // ansi_string_hpp

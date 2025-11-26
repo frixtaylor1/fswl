@@ -11,6 +11,7 @@
 
 #include <utility>
 #include <string.h>
+#include <stdio.h>
 
 template< uint STR_CAPACITY = 128 >
 struct AnsiString { 
@@ -39,6 +40,7 @@ struct AnsiString {
      */
 
     bool        operator == (const AnsiString& rhs);
+    const bool  operator == (const AnsiString& rhs) const;
     bool        operator != (const AnsiString& rhs);
     int         pos(const char& item) const;
     int         pos(const char* pattern) const;
@@ -50,6 +52,7 @@ struct AnsiString {
     bool        lessOrEqualThan(const AnsiString& rhs) const;
     bool        equals(const AnsiString& rhs) const;
     char*       cstr(void);
+    const char* cstr(void) const;
     AnsiString  subStr(uint start, uint end);
     char        at(uint idx) const;
     AnsiString& toLower();
@@ -135,6 +138,11 @@ bool AnsiString< STR_CAPACITY >::operator == (const AnsiString< STR_CAPACITY >& 
 }
 
 template< uint STR_CAPACITY >
+const bool AnsiString< STR_CAPACITY >::operator == (const AnsiString< STR_CAPACITY >& rhs) const {
+    return equals(rhs);
+}
+
+template< uint STR_CAPACITY >
 bool AnsiString< STR_CAPACITY >::operator != (const AnsiString< STR_CAPACITY >& rhs) {
     return !equals(rhs);
 }
@@ -213,8 +221,13 @@ bool AnsiString< STR_CAPACITY >::equals(const AnsiString& rhs) const {
 }
 
 template< uint STR_CAPACITY >
-char* AnsiString< STR_CAPACITY >::cstr() {
+char* AnsiString< STR_CAPACITY >::cstr(void) {
     content.items[content.length] = '\0';
+    return content.items;
+}
+
+template< uint STR_CAPACITY >
+const char* AnsiString< STR_CAPACITY >::cstr(void) const {
     return content.items;
 }
 
