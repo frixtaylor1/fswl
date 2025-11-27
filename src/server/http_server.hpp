@@ -26,17 +26,21 @@ struct HttpServer {
 
     void         init(int p);
     void         start(void);
-    
-    static void* _workerRoutine(void* arg);
-    void         _handleConnection(int clientSocket);
-    void         _cleanup();
-    void         _handleAcceptError(int clientSocket, int &retFlag);
-    void         _setupStart(sockaddr_in &serverAddr, bool &retFlag);
-    void         _initServerAddress(struct sockaddr_in& serverAddr);
-    void         _listen(bool &retFlag);
-    void         _bind(sockaddr_in &serverAddr, bool &retFlag);
-    void         _recicleAddress();
-    void         _startThreadPool();
+
+private:
+    static void* workerRoutine(void* arg);
+    void         handleConnection(int clientSocket);
+    void         parseHeader(int firstLineEnd, SafeString &requestLine, SafeString &headersPart, HttpRequest &req);
+    void         setBody(SafeString &bodyPart, HttpRequest &req);
+    void         parseBody(int delimiterPos, uint firstDelimiterSize, AnsiString<1024U> &fullRequest, SafeString &bodyPart);
+    void         cleanup();
+    void         handleAcceptError(int clientSocket, int &retFlag);
+    void         setupStart(sockaddr_in &serverAddr, bool &retFlag);
+    void         initServerAddress(struct sockaddr_in& serverAddr);
+    void         listen(bool &retFlag);
+    void         bind(sockaddr_in &serverAddr, bool &retFlag);
+    void         recicleAddress();
+    void         startThreadPool();
 };
 
 void HttpServer::init(int portNumber) {
@@ -50,14 +54,14 @@ void HttpServer::start(void) {
     struct sockaddr_in serverAddr;
 
     bool retFlag;
-    _setupStart(serverAddr, retFlag);
+    setupStart(serverAddr, retFlag);
     if (retFlag)
         return;
 
     /**
      * Create the thread pool
      */
-    _startThreadPool();
+    startThreadPool();
     
     SA_PRINT("HTTP Server | Thread pool (%d workers) listening the port %d...\n", threadCount, port);
 
@@ -72,7 +76,7 @@ void HttpServer::start(void) {
             int clientSocket = accept(listenSocket, (struct sockaddr*) &clientAddr, &clientLen);
 
             int retFlag;
-            _handleAcceptError(clientSocket, retFlag);
+            handleAcceptError(clientSocket, retFlag);
             if (retFlag == 2)
                 break;
             if (retFlag == 3)
@@ -82,10 +86,10 @@ void HttpServer::start(void) {
         }
     }
 
-    _cleanup();
+    cleanup();
 }
 
-void HttpServer::_handleAcceptError(int clientSocket, int &retFlag) {
+void HttpServer::handleAcceptError(int clientSocket, int &retFlag) {
     retFlag = 1;
     if (clientSocket < 0) {
         int currentErrno = errno;
@@ -113,7 +117,7 @@ void HttpServer::_handleAcceptError(int clientSocket, int &retFlag) {
     }
 }
 
-void HttpServer::_setupStart(sockaddr_in &serverAddr, bool &retFlag) {
+void HttpServer::setupStart(sockaddr_in &serverAddr, bool &retFlag) {
     retFlag = true;
 
     listenSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -122,22 +126,22 @@ void HttpServer::_setupStart(sockaddr_in &serverAddr, bool &retFlag) {
         return;
     }
 
-    _initServerAddress(serverAddr);
-    _recicleAddress();
+    initServerAddress(serverAddr);
+    recicleAddress();
 
-    _bind(serverAddr, retFlag);
+    bind(serverAddr, retFlag);
     if (retFlag)
         return;
 
-    _listen(retFlag);
+    listen(retFlag);
     if (retFlag)
         return;
     retFlag = false;
 }
 
-void HttpServer::_listen(bool &retFlag) {
+void HttpServer::listen(bool &retFlag) {
     retFlag = true;
-    if (listen(listenSocket, MAX_CONNECTIONS) < 0) {
+    if (::listen(listenSocket, MAX_CONNECTIONS) < 0) {
         SA_PRINT_ERR("Error: listen fail.\n");
         close(listenSocket);
         return;
@@ -145,9 +149,9 @@ void HttpServer::_listen(bool &retFlag) {
     retFlag = false;
 }
 
-void HttpServer::_bind(sockaddr_in &serverAddr, bool &retFlag) {
+void HttpServer::bind(sockaddr_in &serverAddr, bool &retFlag) {
     retFlag = true;
-    if (bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
+    if (::bind(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
         SA_PRINT_ERR("Error: Bind fail. Port nb: %d its occupied.\n", port);
         close(listenSocket);
         return;
@@ -155,13 +159,13 @@ void HttpServer::_bind(sockaddr_in &serverAddr, bool &retFlag) {
     retFlag = false;
 }
 
-void HttpServer::_recicleAddress() {
+void HttpServer::recicleAddress() {
     int opt = 1;
     setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 }
 
 /** member function that executes each thread worker... */
-void* HttpServer::_workerRoutine(void* arg) {
+void* HttpServer::workerRoutine(void* arg) {
     HttpServer* server = (HttpServer*) arg;
     int clientSocket;
     
@@ -172,35 +176,35 @@ void* HttpServer::_workerRoutine(void* arg) {
         
         if (clientSocket > 0) {
             /** handle the connection if there is a task */
-            server->_handleConnection(clientSocket);
-            /** the socket is closed inside of _handleConnection */
+            server->handleConnection(clientSocket);
+            /** the socket is closed inside of handleConnection */
         }
     }
     return NULL;
 }
 
-void HttpServer::_cleanup() {
+void HttpServer::cleanup() {
     close(listenSocket);
     taskQueue.destroy();
 }
 
-void HttpServer::_initServerAddress(struct sockaddr_in& serverAddr) {
+void HttpServer::initServerAddress(struct sockaddr_in& serverAddr) {
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family      = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port        = htons(port);
 }
 
-void HttpServer::_startThreadPool() {
+void HttpServer::startThreadPool() {
     for (int i = 0; i < threadCount; i++) {
-        if (pthread_create(&threadPool[i], NULL, HttpServer::_workerRoutine, (void*) this) != 0) {
+        if (pthread_create(&threadPool[i], NULL, HttpServer::workerRoutine, (void*) this) != 0) {
             perror("Error creating worker thread.");
             /** Error handler... */
         }
     }
 }
 
-void HttpServer::_handleConnection(int clientSocket) {
+void HttpServer::handleConnection(int clientSocket) {
     char buffer[1024];
     uint bytesRead;
     
@@ -217,23 +221,32 @@ void HttpServer::_handleConnection(int clientSocket) {
     AnsiString< 1024 > fullRequest { buffer };
     
     const char firstDelimiter[5]  = "\r\n\r\n";
-    uint       firstDelimiterSize = sizeof(firstDelimiter);
     int        delimiterPos       = fullRequest.pos(firstDelimiter);
     
     if (delimiterPos > 0) {
-        AnsiString< 256 > headersPart = fullRequest.subStr< 256 >(0, delimiterPos);
+        uint              firstDelimiterSize = sizeof(firstDelimiter);
+        AnsiString< 256 > headersPart        = fullRequest.subStr< 256 >(0, delimiterPos);
         AnsiString< 256 > bodyPart;
-        if (delimiterPos + firstDelimiterSize < fullRequest.length()) {
-            AnsiString< 256 > rawbody = fullRequest.subStr< 256 >(delimiterPos + firstDelimiterSize, fullRequest.length());
-            bodyPart
-                .concat("{")
-                    .concat(rawbody)
-                .concat("}");
-        }
+
+        parseBody(delimiterPos, firstDelimiterSize, fullRequest, bodyPart);
+        setBody(bodyPart, req);
 
         int firstLineEnd = headersPart.pos("\r\n");
         AnsiString< 256 > requestLine;
 
+        parseHeader(firstLineEnd, requestLine, headersPart, req);
+    }
+
+    router.routeRequest(&req, &res);
+    
+    AnsiString< 256 > responseStr = res.toString();
+    send(clientSocket, responseStr.cstr(), responseStr.length(), 0);
+    
+    close(clientSocket);
+}
+
+void HttpServer::parseHeader(int firstLineEnd, SafeString &requestLine, SafeString &headersPart, HttpRequest &req)
+{
         if (firstLineEnd > 0) {
             requestLine = headersPart.subStr< 256 >(0, firstLineEnd);
             
@@ -247,18 +260,22 @@ void HttpServer::_handleConnection(int clientSocket) {
         } else {
             requestLine = headersPart;
         }
+}
 
-        if (bodyPart.length() > 0) {
-            req.body.init(bodyPart.cstr(), bodyPart.length());
-        }
+void HttpServer::setBody(SafeString &bodyPart, HttpRequest &req) {
+    if (bodyPart.length() > 0) {
+        req.body.init(bodyPart.cstr(), bodyPart.length());
     }
+}
 
-    router.routeRequest(&req, &res);
-    
-    AnsiString< 256 > responseStr = res.toString();
-    send(clientSocket, responseStr.cstr(), responseStr.length(), 0);
-    
-    close(clientSocket);
+void HttpServer::parseBody(int delimiterPos, uint firstDelimiterSize, AnsiString<1024U> &fullRequest, SafeString &bodyPart) {
+    if (delimiterPos + firstDelimiterSize < fullRequest.length()) {
+        AnsiString<256> rawbody = fullRequest.subStr<256>(delimiterPos + firstDelimiterSize, fullRequest.length());
+        bodyPart
+            .concat("{")
+            .concat(rawbody)
+            .concat("}");
+    }
 }
 
 #endif // http_server_hpp
