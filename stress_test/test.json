@@ -1,0 +1,10 @@
+{
+  "id": 123,
+  "name": "Kevin",
+  "active": true,
+  "tags": [
+    "a",
+    "b",
+    "c"
+  ]
+}

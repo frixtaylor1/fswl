@@ -12,7 +12,7 @@ static void handleHello(HttpRequest* req, HttpResponse* res) {
 }
 
 static void handlePost(HttpRequest* req, HttpResponse* res) {
-    Json          reqJson;
+    Json       reqJson;
     JsonParser jsonParser(&reqJson, req->body.cstr());
 
     if (!jsonParser.parse()) {
@@ -46,6 +46,6 @@ int main() {
     server.router.addRoute("GET", "/status", &handleStatus);
 
     server.start();
-    
+
     return 0;
 }

@@ -8,6 +8,8 @@
 #include "http_router.hpp"
 #include "http_task_queue.hpp"
 
+#include "../stl/static_collection.hpp"
+
 #include <errno.h>
 
 #define MAX_THREADS 16
@@ -199,8 +201,8 @@ void HttpServer::_startThreadPool() {
 }
 
 void HttpServer::_handleConnection(int clientSocket) {
-    char buffer[4096];
-    ssize_t bytesRead;
+    char buffer[1024];
+    uint bytesRead;
     
     bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
     if (bytesRead <= 0) {
@@ -208,45 +210,51 @@ void HttpServer::_handleConnection(int clientSocket) {
         return;
     }
     buffer[bytesRead] = '\0';
-    
+
     HttpRequest  req;
     HttpResponse res;
 
-    const char* bodyStart = strstr(buffer, "\r\n\r\n");
+    AnsiString< 1024 > fullRequest { buffer };
     
-    if (bodyStart) {
-        const char* rawBody = bodyStart + 4;
-        size_t bodyLength = bytesRead - (rawBody - buffer); 
+    int delimiterPos = fullRequest.pos("\r\n\r\n");
+    
+    if (delimiterPos > 0) {
+        AnsiString< 256 > headersPart = fullRequest.subStr< 256 >(0, delimiterPos);
+        AnsiString< 256 > bodyPart;
+        if (delimiterPos + 5 < fullRequest.length()) {
+            AnsiString< 256 > rawbody = fullRequest.subStr< 256 >(delimiterPos + 5, fullRequest.length());
+            bodyPart
+                .concat("{")
+                    .concat(rawbody)
+                .concat("}");
+        }
 
-        if (bodyLength > 0) {
-            req.body.init(rawBody, bodyLength); 
+        AnsiString< 256 > lineDelimiter {"\r\n"};
+        int firstLineEnd = headersPart.pos(lineDelimiter);
+        AnsiString< 256 > requestLine;
+
+        if (firstLineEnd > 0) {
+            requestLine = headersPart.subStr< 256 >(0, firstLineEnd);
+            
+            char spaceDelimiter = ' ';
+            Collection< AnsiString< 256 > > tokens = requestLine.split(spaceDelimiter);
+
+            if (tokens.length >= 1) req.method  = tokens.at(0);
+            if (tokens.length >= 2) req.path    = tokens.at(1);
+            if (tokens.length >= 3) req.version = tokens.at(2);
+
+        } else {
+            requestLine = headersPart;
+        }
+
+        if (bodyPart.length() > 0) {
+            req.body.init(bodyPart.cstr(), bodyPart.length());
         }
     }
 
-    char* line = strtok(buffer, "\r\n");
-    if (line) {
-        char* token = strtok(line, " ");
-        if (token) req.method.init(token);
-        token = strtok(NULL, " ");
-        if (token) req.path.init(token);
-        token = strtok(NULL, " ");
-        if (token) req.version.init(token);
-    }
-    
-    /** 
-     * @TODO: The rest of the `line` tokenization would need to handle headers like 
-     * "Content-Length: 123" to know the exact body size, for a robust solution.
-     */
-
-    /**
-     *  Routing 
-     */
     router.routeRequest(&req, &res);
     
-    /**
-     * Send response...
-     */
-    AnsiString responseStr = res.toString();
+    AnsiString< 256 > responseStr = res.toString();
     send(clientSocket, responseStr.cstr(), responseStr.length(), 0);
     
     close(clientSocket);

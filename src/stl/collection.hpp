@@ -35,8 +35,9 @@ struct Collection {
         Iterator& operator ++ (void);
         Iterator operator -- (int);
 
-        bool      operator == (const Iterator& other) const;
-        bool      operator != (const Iterator& other) const;
+        bool       operator == (const Iterator& other) const;
+        const bool operator != (const Iterator& other) const;
+        bool       operator != (const Iterator& other);
 
         Iterator  operator + (diffptr n) const;
         Iterator  operator - (diffptr n) const;
@@ -74,11 +75,12 @@ struct Collection {
     const ItemType&   at(uint idx) const;
     const ItemType&   firstItem();
     const ItemType&   nextItem();
-    Collection        slice(uint pos, uint nbItems);
     bool              operator == (const Collection& rhs) const;
     bool              operator != (const Collection& rhs);
     int               indexOf(const ItemType& item);
-     const int         indexOf(const ItemType& item) const;
+    const int         indexOf(const ItemType& item) const;
+    template< uint NewCapacity >
+    Collection< ItemType, NewCapacity > slice(uint pos, uint nbItems);
     
     /**
      * Modify family functions...
@@ -155,7 +157,12 @@ bool Collection< ItemType, CAPACITY >::Iterator::operator == (const Iterator& ot
 }
 
 template< class ItemType, uint CAPACITY >
-bool Collection< ItemType, CAPACITY >::Iterator::operator != (const Iterator& other) const { 
+const bool Collection< ItemType, CAPACITY >::Iterator::operator != (const Iterator& other) const { 
+    return current != other.current; 
+}
+
+template< class ItemType, uint CAPACITY >
+bool Collection< ItemType, CAPACITY >::Iterator::operator != (const Iterator& other) { 
     return current != other.current; 
 }
 
@@ -341,10 +348,10 @@ bool Collection< ItemType, CAPACITY >::tryAdd(const ItemType items[], uint nbIte
 }
 
 template< class ItemType, uint CAPACITY >
-Collection< ItemType, CAPACITY > Collection< ItemType, CAPACITY >::slice(uint pos, uint nbItems) {
-    Collection selected;
+template< uint NewCapacity >
+Collection< ItemType, NewCapacity > Collection< ItemType, CAPACITY >::slice(uint pos, uint nbItems) {
+    Collection< ItemType, NewCapacity > selected;
     for (auto&& it = begin(pos); it != end(nbItems -1); ++it) selected.add(*it);
-
     return selected;
 }
 

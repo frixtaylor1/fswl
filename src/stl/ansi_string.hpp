@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 
-template< uint STR_CAPACITY = 128 >
+template< uint STR_CAPACITY = 256 >
 struct AnsiString { 
     enum { MAX_STR_CAP = STR_CAPACITY, NULL_CHAR = 0 };
     Collection< char, MAX_STR_CAP > content;
@@ -25,7 +25,10 @@ struct AnsiString {
     AnsiString(const Collection< char >& collection): content(collection) {}
     AnsiString(const char str[]);
     AnsiString();
-
+    template< uint CollectionCapacity >
+    AnsiString(const Collection< char, CollectionCapacity >& initialContent) : 
+        content(initialContent) 
+    {}
     /**
      * Initialize family functions...
      */
@@ -39,38 +42,41 @@ struct AnsiString {
      * Query family functions...
      */
 
-    bool        operator == (const AnsiString& rhs);
-    const bool  operator == (const AnsiString& rhs) const;
-    bool        operator != (const AnsiString& rhs);
-    int         pos(const char& item) const;
-    int         pos(const char* pattern) const;
-    int         pos(AnsiString& string) const;
-    uint        length(void) const;
-    bool        greatherThan(const AnsiString& rhs) const;
-    bool        greatherOrEqualThan(const AnsiString& rhs) const;
-    bool        lessThan(const AnsiString& rhs) const;
-    bool        lessOrEqualThan(const AnsiString& rhs) const;
-    bool        equals(const AnsiString& rhs) const;
-    char*       cstr(void);
-    const char* cstr(void) const;
-    AnsiString  subStr(uint start, uint end);
-    char        at(uint idx) const;
-    AnsiString& toLower();
-    AnsiString& toUpper();
-
+    bool                     operator == (const AnsiString& rhs);
+    const bool               operator == (const AnsiString& rhs) const;
+    bool                     operator != (const AnsiString& rhs);
+    int                      pos(const char& item) const;
+    int                      pos(const char* pattern) const;
+    int                      pos(AnsiString& string) const;
+    uint                     length(void) const;
+    bool                     greatherThan(const AnsiString& rhs) const;
+    bool                     greatherOrEqualThan(const AnsiString& rhs) const;
+    bool                     lessThan(const AnsiString& rhs) const;
+    bool                     lessOrEqualThan(const AnsiString& rhs) const;
+    bool                     equals(const AnsiString& rhs) const;
+    char*                    cstr(void);
+    const char*              cstr(void) const;
+    char                     at(uint idx) const;
+    AnsiString&              toLower();
+    AnsiString&              toUpper();
+    Collection< AnsiString > split(char delimiter);
+    template< uint NewCapacity >
+    AnsiString< NewCapacity > subStr(uint from, uint to);
+    
     static AnsiString< STR_CAPACITY > toString(const int& value);
     static AnsiString< STR_CAPACITY > toString(const double& value);
     static AnsiString< STR_CAPACITY > toString(const float& value);
     static AnsiString< STR_CAPACITY > toString(const uint& value);
-
+    
     template <typename... Args>
     static AnsiString format(AnsiString& str, Args&& ...args);
-
+    
     template <typename... Args>
     static AnsiString format(const char* str, Args&& ...args);
-
+    
     void              initKmpPartialMatchTable(const char* pattern, int partialMatch[]) const;
     Collection< int > ocurrencesOf(AnsiString& pattern);
+    Collection< int > ocurrencesOf(char ch);
 
     uint size(void) const;
     
@@ -88,7 +94,10 @@ struct AnsiString {
      */
 
     Collection< char, STR_CAPACITY >::Iterator begin(void);
+    Collection< char, STR_CAPACITY >::Iterator begin(uint idx);
     Collection< char, STR_CAPACITY >::Iterator end(void);
+    Collection< char, STR_CAPACITY >::Iterator end(uint idx);
+    const Collection< char, STR_CAPACITY >::Iterator end(void) const;
 };
 
 typedef AnsiString< 256 > SafeString;
@@ -232,9 +241,12 @@ const char* AnsiString< STR_CAPACITY >::cstr(void) const {
 }
 
 template< uint STR_CAPACITY >
-AnsiString< STR_CAPACITY > AnsiString< STR_CAPACITY >::subStr(uint start, uint end) {
-    Collection< char > selected = content.slice(start, end);
-    return { selected };
+template< uint NewCapacity >
+AnsiString< NewCapacity > AnsiString< STR_CAPACITY >::subStr(uint from, uint to) {
+    AnsiString< NewCapacity > selected;
+    for (auto&& it = begin(from); it != end(to -1); ++it) selected.concat(*it);
+
+    return selected;
 }
 
 template< uint STR_CAPACITY >
@@ -262,6 +274,25 @@ AnsiString< STR_CAPACITY >& AnsiString< STR_CAPACITY >::toUpper() {
     }
 
     return *this;
+}
+
+
+template< uint STR_CAPACITY >
+Collection< AnsiString< STR_CAPACITY > > AnsiString< STR_CAPACITY >::split(char delimiter) {
+    Collection< int >        indices = ocurrencesOf(delimiter);
+    Collection< AnsiString > tokens;
+
+    uint current = 0;
+    for (auto&& it = indices.begin(); it != indices.end(); it.next()) {
+        tokens.add(subStr< STR_CAPACITY >(current, *it + 1));
+        current = *it + 1;
+    }
+
+    if (current < length()) {
+        tokens.add(subStr< STR_CAPACITY >(current, length() + 1));
+    }
+    
+    return tokens;
 }
 
 template< uint STR_CAPACITY >
@@ -345,7 +376,7 @@ void AnsiString< STR_CAPACITY >::initKmpPartialMatchTable(const char* pattern, i
 
 template< uint STR_CAPACITY >
 Collection< int > AnsiString<STR_CAPACITY>::ocurrencesOf(AnsiString& pattern) {
-    int stringLength = length();
+    int stringLength  = length();
     int patternLength = pattern.length();
 
     Collection< int > ocurrences;
@@ -374,6 +405,18 @@ Collection< int > AnsiString<STR_CAPACITY>::ocurrencesOf(AnsiString& pattern) {
         }
     }
     return ocurrences;
+}
+
+
+template< uint STR_CAPACITY >
+Collection< int > AnsiString<STR_CAPACITY>::ocurrencesOf(char ch) {
+    Collection< int > selectedIndices ;
+    for (auto&& it = begin(); it != end(); ++it) {
+        if (*it == ch) {
+            selectedIndices.add(it.currentPos());
+        }
+    }
+    return selectedIndices;
 }
 
 template< uint STR_CAPACITY >
@@ -426,7 +469,22 @@ Collection< char, STR_CAPACITY >::Iterator AnsiString< STR_CAPACITY >::begin(voi
 }
 
 template< uint STR_CAPACITY >
+Collection< char, STR_CAPACITY >::Iterator AnsiString< STR_CAPACITY >::begin(uint idx) {
+    return content.begin(idx);
+}
+
+template< uint STR_CAPACITY >
 Collection< char, STR_CAPACITY >::Iterator AnsiString< STR_CAPACITY >::end(void) {
+    return content.end();
+}
+
+template< uint STR_CAPACITY >
+Collection< char, STR_CAPACITY >::Iterator AnsiString< STR_CAPACITY >::end(uint idx) {
+    return content.end(idx);
+}
+
+template< uint STR_CAPACITY >
+const Collection< char, STR_CAPACITY >::Iterator AnsiString< STR_CAPACITY >::end(void) const  {
     return content.end();
 }
 
