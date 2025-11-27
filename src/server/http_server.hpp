@@ -216,13 +216,15 @@ void HttpServer::_handleConnection(int clientSocket) {
 
     AnsiString< 1024 > fullRequest { buffer };
     
-    int delimiterPos = fullRequest.pos("\r\n\r\n");
+    const char firstDelimiter[5]  = "\r\n\r\n";
+    uint       firstDelimiterSize = sizeof(firstDelimiter);
+    int delimiterPos              = fullRequest.pos(firstDelimiter);
     
     if (delimiterPos > 0) {
         AnsiString< 256 > headersPart = fullRequest.subStr< 256 >(0, delimiterPos);
         AnsiString< 256 > bodyPart;
-        if (delimiterPos + 5 < fullRequest.length()) {
-            AnsiString< 256 > rawbody = fullRequest.subStr< 256 >(delimiterPos + 5, fullRequest.length());
+        if (delimiterPos + firstDelimiterSize < fullRequest.length()) {
+            AnsiString< 256 > rawbody = fullRequest.subStr< 256 >(delimiterPos + firstDelimiterSize, fullRequest.length());
             bodyPart
                 .concat("{")
                     .concat(rawbody)
