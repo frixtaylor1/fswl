@@ -218,7 +218,7 @@ void HttpServer::_handleConnection(int clientSocket) {
     
     const char firstDelimiter[5]  = "\r\n\r\n";
     uint       firstDelimiterSize = sizeof(firstDelimiter);
-    int delimiterPos              = fullRequest.pos(firstDelimiter);
+    int        delimiterPos       = fullRequest.pos(firstDelimiter);
     
     if (delimiterPos > 0) {
         AnsiString< 256 > headersPart = fullRequest.subStr< 256 >(0, delimiterPos);
@@ -231,8 +231,7 @@ void HttpServer::_handleConnection(int clientSocket) {
                 .concat("}");
         }
 
-        AnsiString< 256 > lineDelimiter {"\r\n"};
-        int firstLineEnd = headersPart.pos(lineDelimiter);
+        int firstLineEnd = headersPart.pos("\r\n");
         AnsiString< 256 > requestLine;
 
         if (firstLineEnd > 0) {
