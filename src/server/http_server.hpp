@@ -30,7 +30,8 @@ struct HttpServer {
 private:
     static void* workerRoutine(void* arg);
     void         handleConnection(int clientSocket);
-    void         parseHeader(int firstLineEnd, SafeString &requestLine, SafeString &headersPart, HttpRequest &req);
+    void         parseHeaders(SafeString &headersPart, HttpRequest &req);
+    void         parseMethodPathAndVersion(SafeString &headersPart, HttpRequest &req);
     void         setBody(SafeString &bodyPart, HttpRequest &req);
     void         parseBody(int delimiterPos, uint firstDelimiterSize, AnsiString<1024U> &fullRequest, SafeString &bodyPart);
     void         cleanup();
@@ -222,19 +223,15 @@ void HttpServer::handleConnection(int clientSocket) {
     
     const char firstDelimiter[5]  = "\r\n\r\n";
     int        delimiterPos       = fullRequest.pos(firstDelimiter);
-    
     if (delimiterPos > 0) {
         uint              firstDelimiterSize = sizeof(firstDelimiter);
         AnsiString< 256 > headersPart        = fullRequest.subStr< 256 >(0, delimiterPos);
         AnsiString< 256 > bodyPart;
-
+        
         parseBody(delimiterPos, firstDelimiterSize, fullRequest, bodyPart);
         setBody(bodyPart, req);
-
-        int firstLineEnd = headersPart.pos("\r\n");
-        AnsiString< 256 > requestLine;
-
-        parseHeader(firstLineEnd, requestLine, headersPart, req);
+        parseHeaders(headersPart, req);
+        parseMethodPathAndVersion(headersPart, req);
     }
 
     router.routeRequest(&req, &res);
@@ -245,21 +242,36 @@ void HttpServer::handleConnection(int clientSocket) {
     close(clientSocket);
 }
 
-void HttpServer::parseHeader(int firstLineEnd, SafeString &requestLine, SafeString &headersPart, HttpRequest &req)
-{
-        if (firstLineEnd > 0) {
-            requestLine = headersPart.subStr< 256 >(0, firstLineEnd);
-            
-            char spaceDelimiter = ' ';
-            Collection< AnsiString< 256 > > tokens = requestLine.split(spaceDelimiter);
+void HttpServer::parseHeaders(SafeString &headersPart, HttpRequest &req) {
+    Collection<AnsiString<256>> headers = headersPart.split('\r', 1);
+    auto                        it      = headers.begin().next();
 
-            if (tokens.length >= 1) req.method  = tokens.at(0);
-            if (tokens.length >= 2) req.path    = tokens.at(1);
-            if (tokens.length >= 3) req.version = tokens.at(2);
+    for (; it != headers.end(); it.next()) {
+        Collection<AnsiString<256>> keyValue = it.current->split(':', 1);
+        const char *key   = keyValue.at(0).cstr();
+        const char *value = keyValue.at(1).cstr();
+        req.headers.add(key, value);
+    }
+}
 
-        } else {
-            requestLine = headersPart;
-        }
+void HttpServer::parseMethodPathAndVersion(SafeString &headersPart, HttpRequest &req) {
+    
+    AnsiString< 256 > requestLine;
+    int firstLineEnd = headersPart.pos("\r\n");
+
+    if (firstLineEnd > 0) {
+        requestLine = headersPart.subStr< 256 >(0, firstLineEnd);
+        
+        char spaceDelimiter = ' ';
+        Collection< AnsiString< 256 > > tokens = requestLine.split(spaceDelimiter);
+
+        if (tokens.length >= 1) req.method  = tokens.at(0);
+        if (tokens.length >= 2) req.path    = tokens.at(1);
+        if (tokens.length >= 3) req.version = tokens.at(2);
+
+    } else {
+        requestLine = headersPart;
+    }
 }
 
 void HttpServer::setBody(SafeString &bodyPart, HttpRequest &req) {

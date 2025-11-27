@@ -59,7 +59,7 @@ struct AnsiString {
     char                     at(uint idx) const;
     AnsiString&              toLower();
     AnsiString&              toUpper();
-    Collection< AnsiString > split(char delimiter);
+    Collection< AnsiString > split(char delimiter, uint aditionalOffset = 0);
     template< uint NewCapacity >
     AnsiString< NewCapacity > subStr(uint from, uint to);
     
@@ -276,16 +276,15 @@ AnsiString< STR_CAPACITY >& AnsiString< STR_CAPACITY >::toUpper() {
     return *this;
 }
 
-
 template< uint STR_CAPACITY >
-Collection< AnsiString< STR_CAPACITY > > AnsiString< STR_CAPACITY >::split(char delimiter) {
+Collection< AnsiString< STR_CAPACITY > > AnsiString< STR_CAPACITY >::split(char delimiter, uint aditionalOffset) {
     Collection< int >        indices = ocurrencesOf(delimiter);
     Collection< AnsiString > tokens;
 
     uint current = 0;
     for (auto&& it = indices.begin(); it != indices.end(); it.next()) {
         tokens.add(subStr< STR_CAPACITY >(current, *it + 1));
-        current = *it + 1;
+        current = *it + 1 + aditionalOffset;
     }
 
     if (current < length()) {
