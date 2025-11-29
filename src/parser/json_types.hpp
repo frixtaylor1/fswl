@@ -13,7 +13,6 @@ enum JsonType {
 };
 
 typedef AnsiString<64>                                JsonKey;
-typedef AnsiString<64>                                JsonString;
 struct                                                JsonValue;
 typedef AssociativeContainer<JsonKey, JsonValue*, 64> JsonAssociativeContainer;
 typedef Collection<JsonValue*, 64>                    JsonCollection;

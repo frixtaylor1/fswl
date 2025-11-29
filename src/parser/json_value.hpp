@@ -2,6 +2,7 @@
 #define json_value_hpp
 
 #include "json_types.hpp"
+#include "../stl/ansi_string.hpp"
 #include <new>
 
 struct JsonValue {
@@ -11,7 +12,7 @@ struct JsonValue {
         double numberValue;
         bool   boolValue;
 
-        alignas(JsonString) char stringStorage[sizeof(JsonString)];
+        alignas(String)     char stringStorage[sizeof(String)];
         alignas(JsonObject) char objectStorage[sizeof(JsonObject)];
         alignas(JsonArray)  char arrayStorage[sizeof(JsonArray)];
 
@@ -26,8 +27,8 @@ public:
 
     void dump(void);
 
-    JsonString&       getString(void);
-    const JsonString& getString(void) const;
+    String&       getString(void);
+    const String& getString(void) const;
     JsonObject&       getObject(void);
     const JsonObject& getObject(void) const;
     JsonArray&        getArray(void);
@@ -35,17 +36,17 @@ public:
 
     void              setNumber(double val);
     void              setBool(bool val);
-    void              setString(const JsonString& s);
+    void              setString(const String& s);
     void              setNull(void);
     void              setObject(const JsonObject& obj);
     JsonValue&        operator = (const JsonValue& other);
     
 public:
     const JsonValue*  get(const char* key) const;
-    JsonString        serialize(void) const;
+    String        serialize(void) const;
 
     double            asNumber() const;
-    const JsonString& asString(void) const;
+    const String& asString(void) const;
     const JsonObject& asObject(void) const;
     const JsonArray&  asArray(void) const;
 
@@ -57,12 +58,12 @@ void JsonValue::dump(void) {
     _dump(this);
 }
 
-JsonString& JsonValue::getString(void) { 
-    return *(JsonString*) content.stringStorage; 
+String& JsonValue::getString(void) { 
+    return *(String*) content.stringStorage; 
 }
 
-const JsonString& JsonValue::getString(void) const { 
-    return *(JsonString*) content.stringStorage; 
+const String& JsonValue::getString(void) const { 
+    return *(String*) content.stringStorage; 
 }
 
 JsonObject& JsonValue::getObject(void) { 
@@ -86,7 +87,7 @@ JsonValue::JsonValue() : type(JSON_NULL) { content.numberValue = 0; }
 JsonValue::JsonValue(const JsonValue& other) : type(other.type) {
     switch (type) {
         case JSON_STRING:
-            new (&content.stringStorage) JsonString(other.getString());
+            new (&content.stringStorage) String(other.getString());
             break;
         case JSON_NUMBER:
             content.numberValue = other.content.numberValue;
@@ -109,7 +110,7 @@ JsonValue::JsonValue(const JsonValue& other) : type(other.type) {
 JsonValue::JsonValue(JsonValue&& other) : type(other.type) {
     switch (type) {
         case JSON_STRING:
-            new (&content.stringStorage) JsonString(other.getString());
+            new (&content.stringStorage) String(other.getString());
             break;
         case JSON_NUMBER:
             content.numberValue = other.content.numberValue;
@@ -130,11 +131,9 @@ JsonValue::JsonValue(JsonValue&& other) : type(other.type) {
 } 
 
 JsonValue::~JsonValue() {
-    if (this) return;
-
     switch (type) {
         case JSON_STRING:
-            getString().~JsonString();
+            getString().~String();
             break;
         case JSON_OBJECT:
             getObject().~JsonObject();
@@ -154,7 +153,7 @@ JsonValue& JsonValue::operator = (const JsonValue& other) {
         type = other.type;
         switch (type) {
             case JSON_STRING:
-                new (&content.stringStorage) JsonString(other.getString());
+                new (&content.stringStorage) String(other.getString());
                 break;
             case JSON_NUMBER:
                 content.numberValue = other.content.numberValue;
@@ -190,7 +189,7 @@ double JsonValue::asNumber() const {
     return 0.0; 
 }
 
-const JsonString& JsonValue::asString(void) const {
+const String& JsonValue::asString(void) const {
     return getString();
 }
 
@@ -215,10 +214,10 @@ void JsonValue::setBool(bool val) {
     content.boolValue = val;
 }
 
-void JsonValue::setString(const JsonString& s) {
+void JsonValue::setString(const String& s) {
     this->~JsonValue();
     type = JSON_STRING;
-    new (&content.stringStorage) JsonString(s); 
+    new (&content.stringStorage) String(s); 
 }
 
 void JsonValue::setNull() {
@@ -232,7 +231,7 @@ void JsonValue::setObject(const JsonObject& obj) {
     new (&content.objectStorage) JsonObject(obj);
 }
 
-JsonString JsonValue::serialize() const {
+String JsonValue::serialize() const {
     switch (type) {
         case JSON_NULL:
             return "null";
@@ -241,17 +240,17 @@ JsonString JsonValue::serialize() const {
             return content.boolValue ? "true" : "false";
 
         case JSON_NUMBER: {
-            return JsonString::format("%lf", asNumber()); 
+            return String::format("%lf", asNumber()); 
         }
 
         case JSON_STRING: {
-            JsonString raw = asString(); 
-            JsonString encoded = JsonString::format("\"%s\"", raw.cstr());
+            String raw = asString(); 
+            String encoded = String::format("\"%s\"", raw.cstr());
             return encoded; 
         }
 
         case JSON_ARRAY: {
-            JsonString result("{");
+            String result("{");
             const JsonArray& arr = asArray();
             for (uint i = 0; i < arr.items.length; ++i) {
                 if (i > 0) result.concat(", ");
@@ -262,7 +261,7 @@ JsonString JsonValue::serialize() const {
         }
 
         case JSON_OBJECT: {
-            JsonString result("{");
+            String result("{");
             const JsonObject& obj = asObject();
             
             /** @TODO: MUST IMPLEMENT */
@@ -273,7 +272,7 @@ JsonString JsonValue::serialize() const {
             return result;
         }
         default:
-            return JsonString("null");
+            return String("null");
     }
 }
 
