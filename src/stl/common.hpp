@@ -12,7 +12,9 @@
 #    define SA_PRINT(...) printf(__VA_ARGS__)
 #    define SA_PRINT_ERR(...) fprintf(stderr, __VA_ARGS__)
 #else
-/** @TODO: MUST IMPLEMENT... */
+#    define SA_ASSERT(cond, msg) ((void)0)
+#    define SA_PRINT(...)
+#    define SA_PRINT_ERR(...)
 #endif
 
 typedef unsigned int  uint;
