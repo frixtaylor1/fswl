@@ -93,6 +93,8 @@ struct Collection {
     bool              tryAdd(const ItemType items[], uint nbItems);
     void              removeAt(uint idx);
     void              forAll(void (*callback)(const ItemType& item));
+    template< class ConditionFunctionType, class ActionFunctionType >
+    void              forAllByCondition(ConditionFunctionType condition, ActionFunctionType action);
 
     /**
      * Private family functions...
@@ -385,6 +387,14 @@ void Collection< ItemType, CAPACITY >::removeAt(uint idx) {
 template< class ItemType, uint CAPACITY >
 void Collection< ItemType, CAPACITY >::forAll(void (*callback)(const ItemType& item)) {
     for (auto&& it = begin(); it != end(); ++it) callback(*it);
+}
+
+template< class ItemType, uint CAPACITY >
+template< class ConditionFunctionType, class ActionFunctionType > 
+void Collection< ItemType, CAPACITY >::forAllByCondition(ConditionFunctionType condition, ActionFunctionType action) {
+    for (auto&& it = begin(); it != end(); ++it) {
+        if (condition(*it)) action(*it);
+    }
 }
 
 template< class ItemType, uint CAPACITY >

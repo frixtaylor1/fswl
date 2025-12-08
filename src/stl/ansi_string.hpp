@@ -244,7 +244,7 @@ template< uint STR_CAPACITY >
 template< uint NewCapacity >
 AnsiString< NewCapacity > AnsiString< STR_CAPACITY >::subStr(uint from, uint to) {
     AnsiString< NewCapacity > selected;
-    for (auto&& it = begin(from); it != end(to -1); ++it) selected.concat(*it);
+    for (auto&& it = begin(from); it != end(to); ++it) selected.concat(*it);
 
     return selected;
 }
@@ -283,12 +283,12 @@ Collection< AnsiString< STR_CAPACITY > > AnsiString< STR_CAPACITY >::split(char 
 
     uint current = 0;
     for (auto&& it = indices.begin(); it != indices.end(); it.next()) {
-        tokens.add(subStr< STR_CAPACITY >(current, *it + 1));
+        tokens.add(subStr< STR_CAPACITY >(current, *it));
         current = *it + 1 + aditionalOffset;
     }
 
     if (current < length()) {
-        tokens.add(subStr< STR_CAPACITY >(current, length() + 1));
+        tokens.add(subStr< STR_CAPACITY >(current, length()));
     }
     
     return tokens;

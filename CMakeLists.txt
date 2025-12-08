@@ -5,9 +5,6 @@ project(SA
     LANGUAGES CXX
 )
 
-# ============================================================
-#   Global Settings
-# ============================================================
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -19,44 +16,77 @@ endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # ============================================================
-#   Sources
+# PostgreSQL / libpq
+# ============================================================
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PostgreSQL REQUIRED libpq)
+
+if(NOT PostgreSQL_FOUND)
+    message(FATAL_ERROR "PostgreSQL/libpq not found. Install 'libpq-dev'.")
+endif()
+
+# ============================================================
+# FetchContent (para gtest)
+# ============================================================
+include(FetchContent)
+
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+)
+
+set(gtest_disable_pthreads ON CACHE BOOL "Disable pthreads" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+# ============================================================
+# Sources
 # ============================================================
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp" "src/*.cxx" "src/*.cc")
 file(GLOB_RECURSE PROJECT_HEADERS "src/*.hpp" "src/*.h")
+file(GLOB_RECURSE PROJECT_TESTS  "test/**.cpp")
 
 # ============================================================
-#   Main executable
+# Executable principal
 # ============================================================
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
-# ============================================================
-#   Compiler flags (modern style)
-# ============================================================
 target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:-O0 -g3 -Wall -Wextra -Wpedantic>
     $<$<CONFIG:Release>:-O3 -DNDEBUG>
     $<$<CONFIG:RelWithDebInfo>:-O2 -g>
 )
 
-# ============================================================
-#   Include directories
-# ============================================================
-target_include_directories(${PROJECT_NAME} PRIVATE src)
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    src
+    ${PostgreSQL_INCLUDE_DIRS}
+)
 
-# ============================================================
-#   Link pthread explicitly (ThreadPool)
-# ============================================================
-target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    ${PostgreSQL_LIBRARIES}
+    pthread
+)
 
-# ============================================================
-#   Preprocessor definitions
-# ============================================================
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:DEBUG>
 )
 
 # ============================================================
-#   Debug target (launch gdb)
+# Tests
+# ============================================================
+add_executable(${PROJECT_NAME}_tests ${PROJECT_TESTS})
+
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE
+    gtest
+    gtest_main
+)
+
+target_include_directories(${PROJECT_NAME}_tests PRIVATE src)
+
+enable_testing()
+add_test(NAME run_tests COMMAND ${PROJECT_NAME}_tests)
+
+# ============================================================
+# Debug target
 # ============================================================
 add_custom_target(debug
     COMMAND gdb -ex run ${PROJECT_NAME}
@@ -64,9 +94,3 @@ add_custom_target(debug
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Launching GDB debugger..."
 )
-
-# ============================================================
-#   Folder structure (for IDEs)
-# ============================================================
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Source Files" FILES ${PROJECT_SOURCES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "Header Files" FILES ${PROJECT_HEADERS})

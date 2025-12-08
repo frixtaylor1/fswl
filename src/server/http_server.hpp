@@ -285,8 +285,7 @@ void HttpServer::parseBody(int delimiterPos, uint firstDelimiterSize, AnsiString
         AnsiString<256> rawbody = fullRequest.subStr<256>(delimiterPos + firstDelimiterSize, fullRequest.length());
         bodyPart
             .concat("{")
-            .concat(rawbody)
-            .concat("}");
+            .concat(rawbody);
     }
 }
 

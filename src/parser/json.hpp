@@ -21,6 +21,10 @@ struct Json {
     ~Json();
 
     JsonValue*              allocateValue();
+
+    const JsonValue* get(const char* key) const {
+        return object.get(key);
+    }
 };
 
 /** @TODO: generalize (templates), reader, from, analizer, rules, etc... */
@@ -49,10 +53,6 @@ private:
 Json::Json() : object({}), valueCount(0) {}
 
 Json::~Json(void) {
-    for (uint i = 0; i < valueCount; ++i) {
-        JsonValue* value = (JsonValue*) valueArena + (i * sizeof(JsonValue));
-        value->~JsonValue();
-    }
 }
 
 JsonValue* Json::allocateValue(void) {

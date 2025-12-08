@@ -27,8 +27,8 @@ public:
 
     void dump(void);
 
-    String&       getString(void);
-    const String& getString(void) const;
+    String&           getString(void);
+    const String&     getString(void) const;
     JsonObject&       getObject(void);
     const JsonObject& getObject(void) const;
     JsonArray&        getArray(void);
@@ -43,10 +43,11 @@ public:
     
 public:
     const JsonValue*  get(const char* key) const;
-    String        serialize(void) const;
+    String            serialize(void) const;
 
-    double            asNumber() const;
-    const String& asString(void) const;
+    double            asNumber(void) const;
+    const String&     asString(void) const;
+    const char*       asCString(void) const;
     const JsonObject& asObject(void) const;
     const JsonArray&  asArray(void) const;
 
@@ -182,7 +183,7 @@ const JsonValue* JsonValue::get(const char* key) const {
     return nullptr;
 }
 
-double JsonValue::asNumber() const {
+double JsonValue::asNumber(void) const {
     if (type == JSON_NUMBER) {
         return content.numberValue;
     }
@@ -191,6 +192,10 @@ double JsonValue::asNumber() const {
 
 const String& JsonValue::asString(void) const {
     return getString();
+}
+
+const char* JsonValue::asCString(void) const {
+    return getString().cstr();
 }
 
 const JsonObject& JsonValue::asObject(void) const {

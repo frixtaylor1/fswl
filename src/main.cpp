@@ -22,11 +22,12 @@ static void handlePost(HttpRequest* req, HttpResponse* res) {
         return;
     }
     
-    SafeString responseBody = SafeString::format("JSON parsed successfully: hello %s", reqJson.object.get("name")->asString());
-    res->setStatus(200, "OK");
-    res->setBody(responseBody.cstr());
+    if (reqJson.get("name")) {
+        SafeString responseBody = SafeString::format("JSON parsed successfully: hello %s", reqJson.get("name")->asCString());
+        res->setStatus(200, "OK");
+        res->setBody(responseBody.cstr());
+    }
 }
-
 
 static void handleStatus(HttpRequest* req, HttpResponse* res) {
     (void) req;
@@ -38,9 +39,9 @@ int main() {
     HttpServer server;
     server.init(8080);
 
-    server.router.addRoute("GET",  "/",          &handleHello);
-    server.router.addRoute("GET",  "/status",    &handleStatus);
-    server.router.addRoute("POST", "/something", &handlePost);
+    server.router.addRoute("GET", "/",              &handleHello);
+    server.router.addRoute("POST", "/something",    &handlePost);
+    server.router.addRoute("GET", "/status",        &handleStatus);
 
     server.start();
 

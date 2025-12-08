@@ -54,6 +54,7 @@ struct JsonArray {
 
     JsonArray& operator = (const JsonArray& rhs) {
         this->items = rhs.items;
+        return *this;
     }
 };
 

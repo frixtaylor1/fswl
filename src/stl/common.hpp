@@ -21,4 +21,8 @@ typedef unsigned int  uint;
 typedef unsigned long ulong;
 typedef long long     diffptr;
 
+#define interface  struct
+#define implements public
+#define extends    public
+
 #endif // common_hpp
