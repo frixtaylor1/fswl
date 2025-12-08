@@ -94,3 +94,10 @@ add_custom_target(debug
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Launching GDB debugger..."
 )
+
+add_custom_target(debug_tests
+    COMMAND gdb -ex run ${PROJECT_NAME}_tests
+    DEPENDS ${PROJECT_NAME}_tests
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Launching GDB debugger for GTests..."
+)

@@ -12,8 +12,7 @@
 #    include <pthread.h>
 #endif // _PTHREAD_H
 
-class PoolAllocator {
-private:
+struct PoolAllocator {
     enum { POOL_CAPACITY = 1024 * 1024 * 512 };
     Collection< char, POOL_CAPACITY > arena;
     uint                              capacity = POOL_CAPACITY;
@@ -32,7 +31,6 @@ private:
     #define $void   (void*)
     #define $byte_t (char*)
 
-public:
     PoolAllocator();
     ~PoolAllocator();
     PoolAllocator(const PoolAllocator&) = delete;
@@ -71,7 +69,7 @@ PoolAllocator::Header* PoolAllocator::nextHeader(Header* header) const {
 }
 
 bool PoolAllocator::headerFound(Header* header, word_t requestedWords) const {
-    return !header->alloced && !header->reserved && (header->words >= requestedWords);
+    return !header->alloced && !header->reserved && (header->words == 0 || header->words >= requestedWords);
 }
 
 PoolAllocator::Header* PoolAllocator::findBlock(Header* startHeader, word_t requestedWords) {
