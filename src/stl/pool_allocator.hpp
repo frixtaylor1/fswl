@@ -75,11 +75,7 @@ bool PoolAllocator::headerFound(Header* header, word_t requestedWords) const {
 PoolAllocator::Header* PoolAllocator::findBlock(Header* startHeader, word_t requestedWords) {
     Header* currentHeader = startHeader;
 
-    while ($byte_t currentHeader < arenaEnd) {
-        if ($byte_t(currentHeader + 1) >= arenaEnd) {
-            return nullptr;
-        }
-
+    while ($byte_t currentHeader < arenaEnd && !($byte_t(currentHeader + 1) >= arenaEnd)) {
         if (headerFound(currentHeader, requestedWords)) {
             return currentHeader;
         }

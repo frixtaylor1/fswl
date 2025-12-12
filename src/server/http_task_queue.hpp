@@ -17,7 +17,7 @@ struct TaskQueue {
     Queue< int, 512 > sockets;
     pthread_mutex_t   mutex;
     pthread_cond_t    cond;
-    
+
     void init(void);
     void destroy(void);
     void enqueue(int client_socket);
@@ -57,12 +57,7 @@ int TaskQueue::dequeue(void) {
         pthread_cond_wait(&cond, &mutex);
     }
     
-    /**
-     * Obtain the first element in the collection (FIFO)
-     */
-    if (!isEmpty()) {
-        client_socket = sockets.dequeue();
-    }
+    client_socket = sockets.dequeue(); 
     
     pthread_mutex_unlock(&mutex);
     return client_socket;
