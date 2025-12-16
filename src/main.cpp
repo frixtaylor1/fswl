@@ -31,6 +31,7 @@ static void handlePost(HttpRequest* req, HttpResponse* res) {
 
 static void handleStatus(HttpRequest* req, HttpResponse* res) {
     (void) req;
+
     res->setStatus(200, "OK");  
     res->setBody("API Status: Running");
 }

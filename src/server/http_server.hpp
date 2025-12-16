@@ -30,8 +30,8 @@ struct HttpServer {
 private:
     static void* workerRoutine(void* arg);
     void         handleConnection(int clientSocket);
-    void         parseHeaders(SafeString &headersPart, HttpRequest &req);
-    void         parseMethodPathAndVersion(SafeString &headersPart, HttpRequest &req);
+    void         parseHeaders(AnsiString< 1024 > &headersPart, HttpRequest &req);
+    void         parseMethodPathAndVersion(AnsiString< 1024 > &headersPart, HttpRequest &req);
     void         setBody(SafeString &bodyPart, HttpRequest &req);
     void         parseBody(int delimiterPos, uint firstDelimiterSize, AnsiString<1024U> &fullRequest, SafeString &bodyPart);
     void         cleanup();
@@ -225,7 +225,7 @@ void HttpServer::handleConnection(int clientSocket) {
     int        delimiterPos       = fullRequest.pos(firstDelimiter);
     if (delimiterPos > 0) {
         uint              firstDelimiterSize = sizeof(firstDelimiter);
-        AnsiString< 256 > headersPart        = fullRequest.subStr< 256 >(0, delimiterPos);
+        AnsiString< 1024 > headersPart        = fullRequest.subStr< 1024 >(0, delimiterPos);
         AnsiString< 256 > bodyPart;
         
         parseBody(delimiterPos, firstDelimiterSize, fullRequest, bodyPart);
@@ -242,35 +242,35 @@ void HttpServer::handleConnection(int clientSocket) {
     close(clientSocket);
 }
 
-void HttpServer::parseHeaders(SafeString &headersPart, HttpRequest &req) {
-    Collection<AnsiString<256>> headers = headersPart.split('\r', 1);
-    auto                        it      = headers.begin().next();
+void HttpServer::parseHeaders(AnsiString< 1024 > &headersPart, HttpRequest &req) {
+    Collection< AnsiString< 1024 > > headers = headersPart.split('\r', 1);
+    auto                            it      = headers.begin().next();
 
     for (; it != headers.end(); it.next()) {
-        Collection<AnsiString<256>> keyValue = it.current->split(':', 1);
+        Collection<AnsiString<1024>> keyValue = it.current->split(':', 1);
         const char *key   = keyValue.at(0).cstr();
         const char *value = keyValue.at(1).cstr();
         req.headers.add(key, value);
     }
 }
 
-void HttpServer::parseMethodPathAndVersion(SafeString &headersPart, HttpRequest &req) {
+void HttpServer::parseMethodPathAndVersion(AnsiString< 1024 > &headersPart, HttpRequest &req) {
     
-    AnsiString< 256 > requestLine;
+    AnsiString< 1024 > requestLine;
     int firstLineEnd = headersPart.pos("\r\n");
 
     if (firstLineEnd > 0) {
-        requestLine = headersPart.subStr< 256 >(0, firstLineEnd);
+        requestLine = headersPart.subStr< 1024 >(0, firstLineEnd);
         
         char spaceDelimiter = ' ';
-        Collection< AnsiString< 256 > > tokens = requestLine.split(spaceDelimiter);
+        Collection< AnsiString< 1024 > > tokens = requestLine.split(spaceDelimiter);
 
-        if (tokens.length >= 1) req.method  = tokens.at(0);
-        if (tokens.length >= 2) req.path    = tokens.at(1);
-        if (tokens.length >= 3) req.version = tokens.at(2);
+        if (tokens.length >= 1) req.method  = tokens.at(0).cstr();
+        if (tokens.length >= 2) req.path    = tokens.at(1).cstr();
+        if (tokens.length >= 3) req.version = tokens.at(2).cstr();
 
     } else {
-        requestLine = headersPart;
+        requestLine = headersPart.cstr();
     }
 }
 

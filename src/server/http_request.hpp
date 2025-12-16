@@ -14,12 +14,12 @@
 #endif // associative_container_hpp
 
 struct HttpRequest {
-    SafeString method;
-    SafeString path;
-    SafeString version;
+    AnsiString< 512 > method;
+    AnsiString< 512 > path;
+    AnsiString< 512 > version;
     
-    #define MAX_HEADERS 10
-    typedef AssociativeContainer< AnsiString< 20 >, AnsiString< 64 >, MAX_HEADERS> HeaderContainer;
+    #define MAX_HEADERS 30
+    typedef AssociativeContainer< AnsiString< 256 >, AnsiString< 256 >, MAX_HEADERS> HeaderContainer;
 
     HeaderContainer headers;
     SafeString      body;

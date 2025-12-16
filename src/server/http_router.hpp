@@ -11,8 +11,8 @@
 typedef void (*RequestHandler)(HttpRequest* req, HttpResponse* res);
 
 struct Route {
-    SafeString     method;
-    SafeString     path;
+    AnsiString< 512 >     method;
+    AnsiString< 512 >     path;
     RequestHandler handler;
 };
 
@@ -31,7 +31,7 @@ void HttpRouter::addRoute(const char* method, const char* path, RequestHandler h
 
 bool HttpRouter::routeRequest(HttpRequest* req, HttpResponse* res) {
     for (auto&& it = routes.begin(); it != routes.end(); ++it) {
-        if (it->method == req-> method && it->path == req->path) {
+        if (it->method == req->method && it->path == req->path) {
             it->handler(req, res);
             return true;
         }
