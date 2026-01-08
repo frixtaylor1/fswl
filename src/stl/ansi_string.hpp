@@ -11,9 +11,9 @@
 typedef std::string SafeString;
 typedef SafeString String;
 
-template<typename... Args>
-String format(const char* pattern, Args... args) {
-    return fmt::format(pattern, fmt::make_format_args(args...));
+template <typename... Args>
+String format(fmt::format_string<Args...> pattern, Args&&... args) {
+    return fmt::format(pattern, std::forward<Args>(args)...);
 }
 
 #endif // ansi_string_hpp

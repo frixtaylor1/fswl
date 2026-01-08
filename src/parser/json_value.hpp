@@ -246,12 +246,12 @@ String JsonValue::serialize() const {
             return content.boolValue ? "true" : "false";
 
         case JSON_NUMBER: {
-            return fmt::format("{}", asNumber()); 
+            return format("{}", asNumber()); 
         }
 
         case JSON_STRING: {
             String raw = asString(); 
-            String encoded = fmt::format("\"{}\"", raw.c_str());
+            String encoded = format("\"{}\"", raw.c_str());
             return encoded; 
         }
 

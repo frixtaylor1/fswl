@@ -3,10 +3,9 @@
 #include "./server/http_server.hpp"
 #include "./stl/static_collection.hpp"
 #include "./parser/json.hpp"
-#include <fmt/core.h>
 
 static void handleHello(HttpRequest* req, HttpResponse* res) {
-    SafeString responseBody = fmt::format("Hello, API World! : {}", req->path.c_str());
+    SafeString responseBody = format("Hello, API World! : {}", req->path.c_str());
     res->setStatus(200, "OK");
     res->addHeader("X-Custom-Header", "Cpp-Rest");
     res->setBody(responseBody.c_str());
@@ -24,7 +23,7 @@ static void handlePost(HttpRequest* req, HttpResponse* res) {
     }
     
     if (reqJson.get("name")) {
-        SafeString responseBody = fmt::format("JSON parsed successfully: hello {}", reqJson.get("name")->asCString());
+        SafeString responseBody = format("JSON parsed successfully: hello {}", reqJson.get("name")->asCString());
         res->setStatus(200, "OK");
         res->setBody(responseBody.c_str());
     }
