@@ -178,7 +178,7 @@ JsonValue* JsonParser::parseString(void) {
     strncpy(tempStr, start, len);
     tempStr[len] = '\0';
     
-    AnsiString jsonStr(tempStr);
+    String jsonStr(tempStr);
     
     JsonValue* val = json->allocateValue();
     if (val) {

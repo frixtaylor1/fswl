@@ -4,6 +4,7 @@
 #include "json_types.hpp"
 #include "../stl/ansi_string.hpp"
 #include <new>
+#include <fmt/core.h>
 
 struct JsonValue {
     JsonType type = JSON_NULL;
@@ -195,7 +196,7 @@ const String& JsonValue::asString(void) const {
 }
 
 const char* JsonValue::asCString(void) const {
-    return getString().cstr();
+    return getString().c_str();
 }
 
 const JsonObject& JsonValue::asObject(void) const {
@@ -245,12 +246,12 @@ String JsonValue::serialize() const {
             return content.boolValue ? "true" : "false";
 
         case JSON_NUMBER: {
-            return String::format("%lf", asNumber()); 
+            return fmt::format("{}", asNumber()); 
         }
 
         case JSON_STRING: {
             String raw = asString(); 
-            String encoded = String::format("\"%s\"", raw.cstr());
+            String encoded = fmt::format("\"{}\"", raw.c_str());
             return encoded; 
         }
 
@@ -258,22 +259,22 @@ String JsonValue::serialize() const {
             String result("{");
             const JsonArray& arr = asArray();
             for (uint i = 0; i < arr.items.length; ++i) {
-                if (i > 0) result.concat(", ");
-                result.concat(arr.items.items[i]->serialize().cstr()); 
+                if (i > 0) result.append(", ");
+                result.append(arr.items.items[i]->serialize().c_str()); 
             }
-            result.concat("}");
+            result.append("}");
             return result;
         }
 
         case JSON_OBJECT: {
             String result("{");
-            const JsonObject& obj = asObject();
+            auto obj = asObject();
             
             /** @TODO: MUST IMPLEMENT */
 
             bool first = true;
             
-            result.concat("}");
+            result.append("}");
             return result;
         }
         default:
@@ -293,10 +294,10 @@ void JsonValue::_dump(const JsonValue* val, int indent) {
 
     switch (val->type) {
         case JSON_STRING:
-            SA_PRINT("\"%s\"", val->asString().cstr());
+            SA_PRINT("\"%s\"", val->asString().c_str());
             break;
         case JSON_NUMBER:
-            SA_PRINT("%s", val->serialize().cstr());
+            SA_PRINT("%s", val->serialize().c_str());
             break;
         case JSON_BOOL:
             SA_PRINT(val->content.boolValue ? "true" : "false");
@@ -315,7 +316,7 @@ void JsonValue::_dump(const JsonValue* val, int indent) {
                 const JsonKey&   key         = obj.container.getKeyAt(i);
                 const JsonValue* memberValue = obj.container.getValueAt(i);
                 
-                SA_PRINT("\"%s\": ", key.cstr());
+                SA_PRINT("\"%s\": ", key.c_str());
                 
                 if (memberValue->type == JSON_OBJECT || memberValue->type == JSON_ARRAY) {
                     _dump(memberValue, indent + 1);

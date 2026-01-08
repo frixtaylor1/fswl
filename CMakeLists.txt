@@ -16,6 +16,11 @@ endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # ============================================================
+# Hilos (Threads)
+# ============================================================
+find_package(Threads REQUIRED)
+
+# ============================================================
 # PostgreSQL / libpq
 # ============================================================
 find_package(PkgConfig REQUIRED)
@@ -26,7 +31,7 @@ if(NOT PostgreSQL_FOUND)
 endif()
 
 # ============================================================
-# FetchContent (para gtest)
+# FetchContent (Dependencias externas automáticas)
 # ============================================================
 include(FetchContent)
 
@@ -35,15 +40,21 @@ FetchContent_Declare(
     URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
 )
 
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 10.1.1 
+)
+
 set(gtest_disable_pthreads ON CACHE BOOL "Disable pthreads" FORCE)
-FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(googletest fmt)
 
 # ============================================================
 # Sources
 # ============================================================
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp" "src/*.cxx" "src/*.cc")
 file(GLOB_RECURSE PROJECT_HEADERS "src/*.hpp" "src/*.h")
-file(GLOB_RECURSE PROJECT_TESTS  "test/**.cpp")
+file(GLOB_RECURSE PROJECT_TESTS  "test/*.cpp")
 
 # ============================================================
 # Executable principal
@@ -63,7 +74,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     ${PostgreSQL_LIBRARIES}
-    pthread
+    fmt::fmt
+    Threads::Threads  # <--- Fundamental para que no de error de -lthreads
+    
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -73,31 +86,27 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 # ============================================================
 # Tests
 # ============================================================
-add_executable(${PROJECT_NAME}_tests ${PROJECT_TESTS})
+add_executable(${PROJECT_NAME}_tests ${PROJECT_TESTS} ${PROJECT_SOURCES}) # Incluimos PROJECT_SOURCES para que los tests encuentren la lógica del servidor
 
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE
     gtest
     gtest_main
+    fmt::fmt
+    ${PostgreSQL_LIBRARIES}
+    Threads::Threads
 )
 
-target_include_directories(${PROJECT_NAME}_tests PRIVATE src)
+target_include_directories(${PROJECT_NAME}_tests PRIVATE src ${PostgreSQL_INCLUDE_DIRS})
 
 enable_testing()
 add_test(NAME run_tests COMMAND ${PROJECT_NAME}_tests)
 
 # ============================================================
-# Debug target
+# Custom Targets (GDB)
 # ============================================================
 add_custom_target(debug
     COMMAND gdb -ex run ${PROJECT_NAME}
     DEPENDS ${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Launching GDB debugger..."
-)
-
-add_custom_target(debug_tests
-    COMMAND gdb -ex run ${PROJECT_NAME}_tests
-    DEPENDS ${PROJECT_NAME}_tests
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Launching GDB debugger for GTests..."
 )

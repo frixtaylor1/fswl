@@ -1,18 +1,11 @@
-/**
- * Copyright (c) 2025 Kevin Daniel Taylor
- * Licensed under the MIT License (see the LICENSE file in the project root).
- */
 #ifndef http_response_hpp
 #define http_response_hpp
 
-#ifndef ansi_string_hpp
-#    include "../stl/ansi_string.hpp"
-#endif // ansi_string_hpp
-
+#include "../stl/ansi_string.hpp"
 #include "http_header.hpp"
 
 struct HttpResponse {
-    #define MaxResponseHeaders 5
+    #define MaxResponseHeaders 10
     typedef HeaderContainer< MaxResponseHeaders > ResponseHeaderContainer; 
 
     int                     statusCode;
@@ -26,7 +19,24 @@ struct HttpResponse {
     void       setStatus(int code, const char* text);
     void       addHeader(const char* key, const char* value);
     void       setBody(const char* data);
-    SafeString toString(void);
+    
+    String serialize() {
+        String res;
+        
+        res += "HTTP/1.1 " + std::to_string(statusCode) + " " + statusText + "\r\n";
+
+        res += "Content-Length: " + std::to_string(body.length()) + "\r\n";
+        
+        for (uint i = 0; i < headers.length(); ++i) {
+            res += headers.keys.at(i) + ": " + headers.values.at(i) + "\r\n";
+        }
+
+        res += "\r\n";
+
+        res += body;
+
+        return res;
+    }
 };
 
 HttpResponse::HttpResponse() {
@@ -36,9 +46,8 @@ HttpResponse::HttpResponse() {
 void HttpResponse::init(void) {
     statusCode  = 200;
     statusText  = "OK";
-
-    addHeader("Content-Type", "text/plain");
-    addHeader("Connection", "Close");
+    body        = "";
+    // No agregues headers aquí si los vas a calcular dinámicamente en serialize
 }
 
 void HttpResponse::setStatus(int code, const char* text) {
@@ -46,9 +55,6 @@ void HttpResponse::setStatus(int code, const char* text) {
     statusText = text;
 }
 
-/**
- * @TODO: Create an Associative Container...
- */
 void HttpResponse::addHeader(const char* key, const char* value) {
     headers.add(key, value);
 }
@@ -56,30 +62,4 @@ void HttpResponse::addHeader(const char* key, const char* value) {
 void HttpResponse::setBody(const char* data) {
     body = data;
 }
-
-SafeString HttpResponse::toString(void) {
-    SafeString responseStr;
-    
-    /** Status line: HTTP/1.1 200 OK */
-    SafeString statusLine = SafeString::format("HTTP/1.1 %d %s\r\n", statusCode, statusText.cstr());
-    responseStr.concat(statusLine);
-
-    addHeader("Content-Length", SafeString::toString(body.length()).cstr()); 
-    
-    ResponseHeaderContainer::Iterator it;
-    it.init(&headers);
-
-    for (it.begin(); *it.key() != headers.end(); it.next()) {
-        responseStr.concat(it.key()->cstr());
-        responseStr.concat(": ");
-        responseStr.concat(it.value()->cstr());
-        responseStr.concat("\r\n");
-    }
-
-    responseStr.concat("\r\n");
-    responseStr.concat(body);
-
-    return responseStr;
-}
-
-#endif // http_response_hpp
+#endif

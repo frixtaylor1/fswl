@@ -11,8 +11,8 @@
 typedef void (*RequestHandler)(HttpRequest* req, HttpResponse* res);
 
 struct Route {
-    AnsiString< 512 >     method;
-    AnsiString< 512 >     path;
+    String         method;
+    String         path;
     RequestHandler handler;
 };
 
@@ -30,8 +30,17 @@ void HttpRouter::addRoute(const char* method, const char* path, RequestHandler h
 }
 
 bool HttpRouter::routeRequest(HttpRequest* req, HttpResponse* res) {
+    String reqPath = req->path;
+    size_t qpos    = reqPath.find('?');
+    if (qpos != String::npos) {
+        reqPath = reqPath.substr(0, qpos);
+    }
+    if (reqPath.length() > 1 && reqPath.back() == '/') {
+        reqPath.pop_back();
+    }
+
     for (auto&& it = routes.begin(); it != routes.end(); ++it) {
-        if (it->method == req->method && it->path == req->path) {
+        if (it->method == req->method && it->path == reqPath) {
             it->handler(req, res);
             return true;
         }
