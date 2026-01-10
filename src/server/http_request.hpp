@@ -5,9 +5,9 @@
 #ifndef http_request_hpp
 #define http_request_hpp
 
-#ifndef ansi_string_hpp
-#    include "../stl/ansi_string.hpp"
-#endif // ansi_string_hpp
+#ifndef safe_string_hpp
+#    include "../stl/safe_string.hpp"
+#endif // safe_string_hpp
 
 #ifndef associative_container_hpp
 #    include "../stl/associative_container.hpp"

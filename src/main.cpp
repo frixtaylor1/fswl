@@ -5,7 +5,7 @@
 #include "./parser/json.hpp"
 
 static void handleHello(HttpRequest* req, HttpResponse* res) {
-    SafeString responseBody = format("Hello, API World! : {}", req->path.c_str());
+    String responseBody = format("Hello, API World! : {}", req->path.c_str());
     res->setStatus(200, "OK");
     res->addHeader("X-Custom-Header", "Cpp-Rest");
     res->setBody(responseBody.c_str());
@@ -16,14 +16,14 @@ static void handlePost(HttpRequest* req, HttpResponse* res) {
     JsonParser jsonParser(&reqJson, req->body.c_str());
 
     if (!jsonParser.parse()) {
-        SafeString responseBody {"Invalid Json format"};
+        String responseBody {"Invalid Json format"};
         res->setStatus(400, "BadRquest");
         res->setBody(responseBody.c_str());
         return;
     }
     
     if (reqJson.get("name")) {
-        SafeString responseBody = format("JSON parsed successfully: hello {}", reqJson.get("name")->asCString());
+        String responseBody = format("JSON parsed successfully: hello {}", reqJson.get("name")->asCString());
         res->setStatus(200, "OK");
         res->setBody(responseBody.c_str());
     }

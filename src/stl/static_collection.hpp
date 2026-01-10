@@ -9,10 +9,6 @@
 #    include "common.hpp"
 #endif // common_hpp
 
-#ifndef ansi_string_hpp
-#    include "ansi_string.hpp"
-#endif // ansi_string_hpp
-
 #ifndef associative_container_hpp
 #    include "associative_container.hpp"
 #endif // associative_container_hpp

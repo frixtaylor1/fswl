@@ -2,7 +2,7 @@
 #define json_value_hpp
 
 #include "json_types.hpp"
-#include "../stl/ansi_string.hpp"
+#include "../stl/safe_string.hpp"
 #include <new>
 #include <fmt/core.h>
 

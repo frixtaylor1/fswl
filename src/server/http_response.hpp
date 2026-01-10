@@ -1,7 +1,7 @@
 #ifndef http_response_hpp
 #define http_response_hpp
 
-#include "../stl/ansi_string.hpp"
+#include "../stl/safe_string.hpp"
 #include "http_header.hpp"
 
 struct HttpResponse {
