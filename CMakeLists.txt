@@ -75,7 +75,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     ${PostgreSQL_LIBRARIES}
     fmt::fmt
-    Threads::Threads  # <--- Fundamental para que no de error de -lthreads
+    Threads::Threads
     
 )
 
@@ -86,7 +86,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 # ============================================================
 # Tests
 # ============================================================
-add_executable(${PROJECT_NAME}_tests ${PROJECT_TESTS} ${PROJECT_SOURCES}) # Incluimos PROJECT_SOURCES para que los tests encuentren la lógica del servidor
+add_executable(${PROJECT_NAME}_tests ${PROJECT_TESTS})
 
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE
     gtest
