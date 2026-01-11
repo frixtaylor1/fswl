@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2025 Kevin Daniel Taylor
+ * Licensed under the MIT License (see the LICENSE file in the project root).
+ */
 #ifndef i_db_connector_hpp
 #define i_db_connector_hpp
 

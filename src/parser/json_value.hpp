@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2025 Kevin Daniel Taylor
+ * Licensed under the MIT License (see the LICENSE file in the project root).
+ */
 #ifndef json_value_hpp
 #define json_value_hpp
 
