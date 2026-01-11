@@ -11,17 +11,26 @@ static void handleHello(IRequest* req, IResponse* res) {
     res->setBody(responseBody.c_str());
 }
 
-static void handlePost(IRequest* req, IResponse* res) {
-    Json       reqJson;
-    JsonParser jsonParser(&reqJson, req->getBody().c_str());
-
+static void ensureRequest(JsonParser &jsonParser, IResponse *res, bool &retFlag) {
+    retFlag = true;
     if (!jsonParser.parse()) {
-        String responseBody {"Invalid Json format"};
+        String responseBody{"Invalid Json format"};
         res->setStatus(400, "BadRquest");
         res->setBody(responseBody.c_str());
         return;
     }
-    
+    retFlag = false;
+}
+
+static void handlePost(IRequest* req, IResponse* res) {
+    Json       reqJson;
+    JsonParser jsonParser(&reqJson, req->getBody().c_str());
+
+    bool retFlag;
+    ensureRequest(jsonParser, res, retFlag);
+    if (retFlag)
+        return;
+
     if (reqJson.get("name")) {
         String responseBody = format("JSON parsed successfully: hello {}", reqJson.get("name")->asCString());
         res->setStatus(200, "OK");
@@ -29,7 +38,7 @@ static void handlePost(IRequest* req, IResponse* res) {
     }
 }
 
-static void handleStatus(IRequest* req, IResponse* res) {
+static void handleStatus(IRequest *req, IResponse *res) {
     (void) req;
 
     res->setStatus(200, "OK");  
@@ -39,6 +48,19 @@ static void handleStatus(IRequest* req, IResponse* res) {
 interface IMiddleware {
     virtual void process(IRequest* req, IResponse* res) = 0;
 };
+
+struct Middleware : implements IMiddleware {
+    void process(IRequest* req, IResponse* res) {
+        (void) req; (void) res;
+        return ;
+    }
+};
+
+void assignRoutes(IRouter* router) {
+    router->add("GET",  "/",          &handleHello);
+    router->add("POST", "/something", &handlePost);
+    router->add("GET",  "/status",    &handleStatus);
+}
 
 template <class Application>
 implementing < IServer, Application >
@@ -51,29 +73,23 @@ struct Serve {
         template < class Middleware >
         implementing < IMiddleware, Middleware >
         struct With {
-
             Application    server;
-            RouteHandler   routeHandler;
+            RouteHandler   router;
             Middleware     middleware;
-            
-            With() {
 
-                SA_ASSERT(false, "MUST IMPLEMENT!");
+            With() {
+                server.init(8081);
+                server.bindRouter(&router);
+                assignRoutes(&router);
+                server.start();
             }
         };
     };
 };
 
-int main() {
-    HttpRouter router;
-    HttpServer server(router);
-    server.init(8081);
+typedef Serve< HttpServer >::Publishing< HttpRouter >::With< Middleware > ApiRest;
 
-    server.router.add("GET", "/",              &handleHello);
-    server.router.add("POST", "/something",    &handlePost);
-    server.router.add("GET", "/status",        &handleStatus);
-
-    server.start();
-
-    return 0;
+int main(void) {
+    ApiRest();
+    return 0; 
 }

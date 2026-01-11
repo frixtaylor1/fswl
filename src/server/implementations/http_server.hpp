@@ -20,7 +20,7 @@
 #define MAX_CONNECTIONS 1024
 
 struct HttpServer : implements IServer {
-    IRouter&     router;
+    IRouter*     router;
     int          listenSocket;
     int          port;
     
@@ -30,8 +30,9 @@ struct HttpServer : implements IServer {
 
     void         init(uint port);
     void         start(void);
-
-    HttpServer(IRouter& routerImpl) : router(routerImpl) {}
+    void         bindRouter(IRouter* routerImpl) {
+        router = routerImpl;
+    }
 
 private:
     static void* workerRoutine(void* arg);
@@ -243,7 +244,7 @@ void HttpServer::handleConnection(int clientSocket) {
         debugRequestHeaders(headersPart, req, fullRequest);
     }
 
-    router.handle(&req, &res);
+    router->handle(&req, &res);
     
     String responseStr = res.serialize();
     send(clientSocket, responseStr.c_str(), responseStr.length(), 0);
