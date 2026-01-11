@@ -5,6 +5,8 @@
 #ifndef common_hpp
 #define common_hpp 
 
+#include <type_traits>
+
 #ifdef DEBUG
 #    include <assert.h>
 #    include <stdio.h>
@@ -21,8 +23,9 @@ typedef unsigned int  uint;
 typedef unsigned long ulong;
 typedef long long     diffptr;
 
-#define interface  struct
-#define implements public
-#define extends    public
+#define interface    struct
+#define implements   public
+#define extends      public
+#define implementing requires std::is_base_of_v
 
 #endif // common_hpp

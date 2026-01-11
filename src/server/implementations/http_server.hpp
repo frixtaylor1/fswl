@@ -5,19 +5,22 @@
 #ifndef http_server_hpp
 #define http_server_hpp
 
+#include "../../stl/common.hpp"
 #include "http_router.hpp"
 #include "http_task_queue.hpp"
 #include <string.h>
 
-#include "../stl/static_collection.hpp"
+#include "../../stl/static_collection.hpp"
+#include "../interfaces/iserver.hpp"
+#include "../interfaces/irouter.hpp"
 
 #include <errno.h>
 
 #define MAX_THREADS 16
 #define MAX_CONNECTIONS 1024
 
-struct HttpServer {
-    HttpRouter   router;
+struct HttpServer : implements IServer {
+    IRouter&     router;
     int          listenSocket;
     int          port;
     
@@ -25,13 +28,15 @@ struct HttpServer {
     pthread_t    threadPool[MAX_THREADS];
     int          threadCount;
 
-    void         init(int p);
+    void         init(uint port);
     void         start(void);
+
+    HttpServer(IRouter& routerImpl) : router(routerImpl) {}
 
 private:
     static void* workerRoutine(void* arg);
-    void handleConnection(int clientSocket);
-    void debugRequestHeaders(String &headersPart, HttpRequest &req, String &fullRequest);
+    void         handleConnection(int clientSocket);
+    void         debugRequestHeaders(String &headersPart, HttpRequest &req, String &fullRequest);
     void         parseMethodPathAndVersion(String &headersPart, HttpRequest &req);
     void         setBody(String &bodyPart, HttpRequest &req);
     void         parseBody(int delimiterPos, uint firstDelimiterSize, String &fullRequest, String &bodyPart);
@@ -45,8 +50,8 @@ private:
     void         startThreadPool();
 };
 
-void HttpServer::init(int portNumber) {
-    port         = portNumber;
+void HttpServer::init(uint port) {
+    this->port   = port;
     listenSocket = -1;
     threadCount  = MAX_THREADS;
     taskQueue.init();
@@ -238,7 +243,7 @@ void HttpServer::handleConnection(int clientSocket) {
         debugRequestHeaders(headersPart, req, fullRequest);
     }
 
-    router.routeRequest(&req, &res);
+    router.handle(&req, &res);
     
     String responseStr = res.serialize();
     send(clientSocket, responseStr.c_str(), responseStr.length(), 0);

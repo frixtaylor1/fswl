@@ -1,10 +1,11 @@
 #ifndef http_response_hpp
 #define http_response_hpp
 
-#include "../stl/safe_string.hpp"
-#include "http_header.hpp"
+#include "../../stl/safe_string.hpp"
+#include "../interfaces/iresponse.hpp"
+#include "../types/http_header.hpp"
 
-struct HttpResponse {
+struct HttpResponse : implements IResponse{
     #define MaxResponseHeaders 10
     typedef HeaderContainer< MaxResponseHeaders > ResponseHeaderContainer; 
 
@@ -19,6 +20,10 @@ struct HttpResponse {
     void       setStatus(int code, const char* text);
     void       addHeader(const char* key, const char* value);
     void       setBody(const char* data);
+
+    const ResponseHeaderContainer& getHeaders(void) {
+        return headers;
+    }
     
     String serialize() {
         String res;

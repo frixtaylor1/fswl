@@ -5,10 +5,9 @@
 #ifndef http_router_hpp
 #define http_router_hpp
 
+#include "../interfaces/irouter.hpp"
 #include "http_request.hpp"
 #include "http_response.hpp"
-
-typedef void (*RequestHandler)(HttpRequest* req, HttpResponse* res);
 
 struct Route {
     String         method;
@@ -18,19 +17,19 @@ struct Route {
 
 #define MAX_ROUTES 20
 
-struct HttpRouter {
+struct HttpRouter : implements IRouter {
     Collection< Route, MAX_ROUTES > routes;
 
-    void addRoute(const char* method, const char* path, RequestHandler handler);
-    bool routeRequest(HttpRequest* req, HttpResponse* res);
+    void add(const char* method, const char* path, RequestHandler handler) override;
+    bool handle(IRequest* req, IResponse* res);
 };
 
-void HttpRouter::addRoute(const char* method, const char* path, RequestHandler handler) {
+void HttpRouter::add(const char* method, const char* path, RequestHandler handler) {
     routes.tryAdd({method, path, handler});
 }
 
-bool HttpRouter::routeRequest(HttpRequest* req, HttpResponse* res) {
-    String reqPath = req->path;
+bool HttpRouter::handle(IRequest* req, IResponse* res) {
+    String reqPath = req->getPath();
     size_t qpos    = reqPath.find('?');
     if (qpos != String::npos) {
         reqPath = reqPath.substr(0, qpos);
@@ -40,7 +39,7 @@ bool HttpRouter::routeRequest(HttpRequest* req, HttpResponse* res) {
     }
 
     for (auto&& it = routes.begin(); it != routes.end(); ++it) {
-        if (it->method == req->method && it->path == reqPath) {
+        if (it->method == req->getMethod() && it->path == reqPath) {
             it->handler(req, res);
             return true;
         }
