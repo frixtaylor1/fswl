@@ -46,8 +46,14 @@ FetchContent_Declare(
     GIT_TAG 10.1.1 
 )
 
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.2
+)
+
 set(gtest_disable_pthreads ON CACHE BOOL "Disable pthreads" FORCE)
-FetchContent_MakeAvailable(googletest fmt)
+FetchContent_MakeAvailable(googletest fmt nlohmann_json)
 
 # ============================================================
 # Sources
@@ -76,7 +82,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${PostgreSQL_LIBRARIES}
     fmt::fmt
     Threads::Threads
-    
+    nlohmann_json::nlohmann_json
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -94,6 +100,7 @@ target_link_libraries(${PROJECT_NAME}_tests PRIVATE
     fmt::fmt
     ${PostgreSQL_LIBRARIES}
     Threads::Threads
+    nlohmann_json::nlohmann_json
 )
 
 target_include_directories(${PROJECT_NAME}_tests PRIVATE src ${PostgreSQL_INCLUDE_DIRS})

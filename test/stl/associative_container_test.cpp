@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include "../../src/stl/associative_container.hpp"
-
 template< class Key, class Value, uint CONTAINER_CAPACITY >
 struct AssociativeContainerWrapper {
     static constexpr uint CAPACITY = CONTAINER_CAPACITY;

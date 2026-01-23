@@ -2,11 +2,17 @@
  * Copyright (c) 2025 Kevin Daniel Taylor
  * Licensed under the MIT License (see the LICENSE file in the project root).
  */
-#ifndef associative_conatiner_hpp
-#define associative_conatiner_hpp
+#ifndef associative_container_hpp
+#define associative_container_hpp
 
 #include "collection.hpp"
 
+/**
+ * AssociativeContainer - A map-like data structure with fixed capacity.
+ * 
+ * This container stores key-value pairs using parallel collections.
+ * Current complexity: O(n) for lookups due to linear search.
+ */
 template< class KeyType, class ValueType, uint CAPACITY = 128 >
 struct AssociativeContainer {
     Collection<KeyType,   CAPACITY > keys;
@@ -28,19 +34,17 @@ struct AssociativeContainer {
     ValueType& add(const KeyType& key, const ValueType& value);
 
     /** Query family functions... */
-    bool             exists(const KeyType& key);
-    const bool       exists(const KeyType& key) const;
+    bool             exists(const KeyType& key) const;
     const KeyType&   getKeyAt(uint idx) const;
-    KeyType          getKeyAt(uint idx);
+    KeyType&         getKeyAt(uint idx);
     ValueType&       at(const KeyType& key);
     const ValueType& at(const KeyType& key) const;
     ValueType&       getValue(const KeyType& key);
     const ValueType& getValue(const KeyType& key) const;
     const ValueType& getValueAt(uint idx) const;
-    ValueType        getValueAt(uint idx);
+    ValueType&       getValueAt(uint idx);
     KeyType&         end(void);
-    uint             length(void);
-    const uint       length(void) const;
+    uint             length(void) const;
 };
 
 template< class KeyType, class ValueType, uint CAPACITY >
@@ -96,17 +100,12 @@ ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::add(const KeyTy
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
-bool AssociativeContainer< KeyType, ValueType, CAPACITY >::exists(const KeyType& key) {
+bool AssociativeContainer< KeyType, ValueType, CAPACITY >::exists(const KeyType& key) const {
     return keys.indexOf(key) != -1;
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
-const bool AssociativeContainer< KeyType, ValueType, CAPACITY >::exists(const KeyType& key) const {
-    return keys.indexOf(key) != -1;
-}
-
-template< class KeyType, class ValueType, uint CAPACITY >
-KeyType AssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint idx) {
+KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint idx) {
     return keys.at(idx);
 }
 
@@ -141,7 +140,7 @@ const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueA
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
-ValueType AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint idx) {
+ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint idx) {
     return values.at(idx);
 }
 
@@ -151,12 +150,7 @@ KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::end(void) {
 }
 
 template< class KeyType, class ValueType, uint CAPACITY >
-uint AssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) {
-    return keys.length;
-}
-
-template< class KeyType, class ValueType, uint CAPACITY >
-const uint AssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) const {
+uint AssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) const {
     return keys.length;
 }
 

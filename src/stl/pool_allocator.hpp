@@ -6,15 +6,10 @@
 #define pool_allocator_hpp
 
 #include "common.hpp"
-#include "collection.hpp"
 
-#ifndef _STRING_H
-#    include <string.h>
-#endif // _STRING_H
-
-#ifndef _PTHREAD_H
-#    include <pthread.h>
-#endif // _PTHREAD_H
+#ifndef collection_hpp
+#   include "collection.hpp"
+#endif // collection_hpp
 
 struct PoolAllocator {
     enum { POOL_CAPACITY = 1024 * 1024 * 512 };
@@ -55,28 +50,28 @@ private:
 };
 
 
-PoolAllocator::word_t PoolAllocator::calculateWords(uint bytes) const {
+inline PoolAllocator::word_t PoolAllocator::calculateWords(uint bytes) const {
     return (bytes + 3) / 4;
 }
 
-uint PoolAllocator::calculateBytes(word_t words) const {
+inline uint PoolAllocator::calculateBytes(word_t words) const {
     return words * 4;
 }
 
-PoolAllocator::Header* PoolAllocator::getHeader(void* ptr) const {
+inline PoolAllocator::Header* PoolAllocator::getHeader(void* ptr) const {
     return $header ptr - 1;
 }
 
-PoolAllocator::Header* PoolAllocator::nextHeader(Header* header) const {
+inline PoolAllocator::Header* PoolAllocator::nextHeader(Header* header) const {
     char* data_ptr = $byte_t(header + 1);
     return $header(data_ptr + calculateBytes(header->words));
 }
 
-bool PoolAllocator::headerFound(Header* header, word_t requestedWords) const {
+inline bool PoolAllocator::headerFound(Header* header, word_t requestedWords) const {
     return !header->alloced && !header->reserved && (header->words == 0 || header->words >= requestedWords);
 }
 
-PoolAllocator::Header* PoolAllocator::findBlock(Header* startHeader, word_t requestedWords) {
+inline PoolAllocator::Header* PoolAllocator::findBlock(Header* startHeader, word_t requestedWords) {
     Header* currentHeader = startHeader;
 
     while ($byte_t currentHeader < arenaEnd && !($byte_t(currentHeader + 1) >= arenaEnd)) {
@@ -90,11 +85,11 @@ PoolAllocator::Header* PoolAllocator::findBlock(Header* startHeader, word_t requ
     return nullptr;
 }
 
-void* PoolAllocator::getBlockArea(Header* header) const {
+inline void* PoolAllocator::getBlockArea(Header* header) const {
     return header + 1;
 }
 
-void PoolAllocator::initializeFirstHeader() {
+inline void PoolAllocator::initializeFirstHeader() {
     Header* h = $header &arena.at(0);
     
     uint usable = capacity - sizeof(Header);
@@ -105,15 +100,15 @@ void PoolAllocator::initializeFirstHeader() {
     h->reserved = false;
 }
 
-PoolAllocator::PoolAllocator() {
+inline PoolAllocator::PoolAllocator() {
     initializeFirstHeader();
     arenaEnd = &arena.at(capacity);
 }
 
-PoolAllocator::~PoolAllocator() {
+inline PoolAllocator::~PoolAllocator() {
 }
 
-void* PoolAllocator::alloc(uint bytes) {
+inline void* PoolAllocator::alloc(uint bytes) {
     word_t requestedWords = calculateWords(bytes);
     
     pthread_mutex_lock(&allocatorMutex);
@@ -147,7 +142,7 @@ void* PoolAllocator::alloc(uint bytes) {
     return getBlockArea(selected);
 }
 
-void PoolAllocator::dealloc(void* ptr) {
+inline void PoolAllocator::dealloc(void* ptr) {
     if (!ptr) return;
     
     pthread_mutex_lock(&allocatorMutex);
@@ -164,7 +159,7 @@ void PoolAllocator::dealloc(void* ptr) {
     pthread_mutex_unlock(&allocatorMutex);
 }
 
-void* PoolAllocator::realloc(void* ptr, uint newBytes) {
+inline void* PoolAllocator::realloc(void* ptr, uint newBytes) {
     if (!ptr) {
         return alloc(newBytes);
     }

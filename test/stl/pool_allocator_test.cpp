@@ -14,8 +14,6 @@ protected:
     }
 };
 
-using uint = unsigned int;
-
 TEST_F(PoolAllocatorTest, BasicAllocationAndDeallocation) {
     uint size1 = 100;
     void* ptr1 = allocate_and_check(size1);
