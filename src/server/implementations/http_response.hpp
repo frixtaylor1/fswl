@@ -34,6 +34,7 @@ struct HttpResponse : implements IResponse{
         
         res += "HTTP/1.1 " + std::to_string(statusCode) + " " + statusText + "\r\n";
         res += "Content-Length: " + std::to_string(body.length()) + "\r\n";
+        res += "Connection: close\r\n";
         
         for (uint i = 0; i < headers.length(); ++i) {
             res += headers.keys.at(i) + ": " + headers.values.at(i) + "\r\n";

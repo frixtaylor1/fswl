@@ -26,12 +26,13 @@ struct Serve {
         template < class Middleware >
         implementing < IMiddleware, Middleware >
         struct With {
+
             Application    server;
             RouteHandler   router;
             Middleware     middleware;
 
             With() {
-                server.init(8081);
+                server.init();
                 server.bindRouter(&router);
                 assignRoutes(&router);
                 server.start();

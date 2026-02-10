@@ -28,7 +28,7 @@ struct HttpServer : implements IServer {
     pthread_t    threadPool[MAX_THREADS];
     int          threadCount;
 
-    void         init(uint port);
+    void         init(uint port = 8081);
     void         start(void);
     void         bindRouter(IRouter* routerImpl) {
         router = routerImpl;
@@ -308,9 +308,7 @@ void HttpServer::setBody(String &bodyPart, HttpRequest &req) {
 void HttpServer::parseBody(int delimiterPos, uint firstDelimiterSize, String &fullRequest, String &bodyPart) {
     if (delimiterPos + firstDelimiterSize < fullRequest.length()) {
         String rawbody = fullRequest.substr(delimiterPos + firstDelimiterSize, fullRequest.length());
-        bodyPart
-            .append("{")
-            .append(rawbody);
+        bodyPart.append(rawbody);
     }
 }
 

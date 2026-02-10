@@ -7,7 +7,7 @@ local json_body = file:read("*a")
 file:close()
 
 request = function()
-   return wrk.format("POST", "/hello", {
+   return wrk.format("POST", "/something", {
        ["Content-Type"] = "application/json"
    }, json_body)
 end
