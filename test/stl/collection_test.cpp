@@ -11,14 +11,14 @@ struct TestItem {
 template<typename T>
 class CollectionTest : public ::testing::Test {
 protected:
-    static constexpr uint TEST_CAPACITY = 4;
+    static constexpr uint32 TEST_CAPACITY = 4;
     Collection<T, TEST_CAPACITY> collection;
 
     void SetUp() override {
     }
 
-    void populate(uint count) {
-        for (uint i = 0; i < count; ++i) {
+    void populate(uint32 count) {
+        for (uint32 i = 0; i < count; ++i) {
             if constexpr (std::is_same_v<T, int>) {
                 collection.add(static_cast<int>(i * 10));
             } else if constexpr (std::is_same_v<T, TestItem>) {

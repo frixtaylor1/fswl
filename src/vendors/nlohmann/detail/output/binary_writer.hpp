@@ -12,7 +12,7 @@
 #include <array> // array
 #include <map> // map
 #include <cmath> // isnan, isinf
-#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+#include <cstdint> // uint328_t, uint3216_t, uint32_t, uint3264_t
 #include <cstring> // memcpy
 #include <limits> // numeric_limits
 #include <string> // string
@@ -113,17 +113,17 @@ class binary_writer
                     // code from the value_t::number_unsigned case here.
                     if (j.m_value.number_integer <= 0x17)
                     {
-                        write_number(static_cast<std::uint8_t>(j.m_value.number_integer));
+                        write_number(static_cast<std::uint328_t>(j.m_value.number_integer));
                     }
-                    else if (j.m_value.number_integer <= (std::numeric_limits<std::uint8_t>::max)())
+                    else if (j.m_value.number_integer <= (std::numeric_limits<std::uint328_t>::max)())
                     {
                         oa->write_character(to_char_type(0x18));
-                        write_number(static_cast<std::uint8_t>(j.m_value.number_integer));
+                        write_number(static_cast<std::uint328_t>(j.m_value.number_integer));
                     }
-                    else if (j.m_value.number_integer <= (std::numeric_limits<std::uint16_t>::max)())
+                    else if (j.m_value.number_integer <= (std::numeric_limits<std::uint3216_t>::max)())
                     {
                         oa->write_character(to_char_type(0x19));
-                        write_number(static_cast<std::uint16_t>(j.m_value.number_integer));
+                        write_number(static_cast<std::uint3216_t>(j.m_value.number_integer));
                     }
                     else if (j.m_value.number_integer <= (std::numeric_limits<std::uint32_t>::max)())
                     {
@@ -133,7 +133,7 @@ class binary_writer
                     else
                     {
                         oa->write_character(to_char_type(0x1B));
-                        write_number(static_cast<std::uint64_t>(j.m_value.number_integer));
+                        write_number(static_cast<std::uint3264_t>(j.m_value.number_integer));
                     }
                 }
                 else
@@ -143,17 +143,17 @@ class binary_writer
                     const auto positive_number = -1 - j.m_value.number_integer;
                     if (j.m_value.number_integer >= -24)
                     {
-                        write_number(static_cast<std::uint8_t>(0x20 + positive_number));
+                        write_number(static_cast<std::uint328_t>(0x20 + positive_number));
                     }
-                    else if (positive_number <= (std::numeric_limits<std::uint8_t>::max)())
+                    else if (positive_number <= (std::numeric_limits<std::uint328_t>::max)())
                     {
                         oa->write_character(to_char_type(0x38));
-                        write_number(static_cast<std::uint8_t>(positive_number));
+                        write_number(static_cast<std::uint328_t>(positive_number));
                     }
-                    else if (positive_number <= (std::numeric_limits<std::uint16_t>::max)())
+                    else if (positive_number <= (std::numeric_limits<std::uint3216_t>::max)())
                     {
                         oa->write_character(to_char_type(0x39));
-                        write_number(static_cast<std::uint16_t>(positive_number));
+                        write_number(static_cast<std::uint3216_t>(positive_number));
                     }
                     else if (positive_number <= (std::numeric_limits<std::uint32_t>::max)())
                     {
@@ -163,7 +163,7 @@ class binary_writer
                     else
                     {
                         oa->write_character(to_char_type(0x3B));
-                        write_number(static_cast<std::uint64_t>(positive_number));
+                        write_number(static_cast<std::uint3264_t>(positive_number));
                     }
                 }
                 break;
@@ -173,17 +173,17 @@ class binary_writer
             {
                 if (j.m_value.number_unsigned <= 0x17)
                 {
-                    write_number(static_cast<std::uint8_t>(j.m_value.number_unsigned));
+                    write_number(static_cast<std::uint328_t>(j.m_value.number_unsigned));
                 }
-                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint8_t>::max)())
+                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint328_t>::max)())
                 {
                     oa->write_character(to_char_type(0x18));
-                    write_number(static_cast<std::uint8_t>(j.m_value.number_unsigned));
+                    write_number(static_cast<std::uint328_t>(j.m_value.number_unsigned));
                 }
-                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
                     oa->write_character(to_char_type(0x19));
-                    write_number(static_cast<std::uint16_t>(j.m_value.number_unsigned));
+                    write_number(static_cast<std::uint3216_t>(j.m_value.number_unsigned));
                 }
                 else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint32_t>::max)())
                 {
@@ -193,7 +193,7 @@ class binary_writer
                 else
                 {
                     oa->write_character(to_char_type(0x1B));
-                    write_number(static_cast<std::uint64_t>(j.m_value.number_unsigned));
+                    write_number(static_cast<std::uint3264_t>(j.m_value.number_unsigned));
                 }
                 break;
             }
@@ -227,17 +227,17 @@ class binary_writer
                 const auto N = j.m_value.string->size();
                 if (N <= 0x17)
                 {
-                    write_number(static_cast<std::uint8_t>(0x60 + N));
+                    write_number(static_cast<std::uint328_t>(0x60 + N));
                 }
-                else if (N <= (std::numeric_limits<std::uint8_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint328_t>::max)())
                 {
                     oa->write_character(to_char_type(0x78));
-                    write_number(static_cast<std::uint8_t>(N));
+                    write_number(static_cast<std::uint328_t>(N));
                 }
-                else if (N <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
                     oa->write_character(to_char_type(0x79));
-                    write_number(static_cast<std::uint16_t>(N));
+                    write_number(static_cast<std::uint3216_t>(N));
                 }
                 else if (N <= (std::numeric_limits<std::uint32_t>::max)())
                 {
@@ -245,10 +245,10 @@ class binary_writer
                     write_number(static_cast<std::uint32_t>(N));
                 }
                 // LCOV_EXCL_START
-                else if (N <= (std::numeric_limits<std::uint64_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3264_t>::max)())
                 {
                     oa->write_character(to_char_type(0x7B));
-                    write_number(static_cast<std::uint64_t>(N));
+                    write_number(static_cast<std::uint3264_t>(N));
                 }
                 // LCOV_EXCL_STOP
 
@@ -265,17 +265,17 @@ class binary_writer
                 const auto N = j.m_value.array->size();
                 if (N <= 0x17)
                 {
-                    write_number(static_cast<std::uint8_t>(0x80 + N));
+                    write_number(static_cast<std::uint328_t>(0x80 + N));
                 }
-                else if (N <= (std::numeric_limits<std::uint8_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint328_t>::max)())
                 {
                     oa->write_character(to_char_type(0x98));
-                    write_number(static_cast<std::uint8_t>(N));
+                    write_number(static_cast<std::uint328_t>(N));
                 }
-                else if (N <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
                     oa->write_character(to_char_type(0x99));
-                    write_number(static_cast<std::uint16_t>(N));
+                    write_number(static_cast<std::uint3216_t>(N));
                 }
                 else if (N <= (std::numeric_limits<std::uint32_t>::max)())
                 {
@@ -283,10 +283,10 @@ class binary_writer
                     write_number(static_cast<std::uint32_t>(N));
                 }
                 // LCOV_EXCL_START
-                else if (N <= (std::numeric_limits<std::uint64_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3264_t>::max)())
                 {
                     oa->write_character(to_char_type(0x9B));
-                    write_number(static_cast<std::uint64_t>(N));
+                    write_number(static_cast<std::uint3264_t>(N));
                 }
                 // LCOV_EXCL_STOP
 
@@ -302,25 +302,25 @@ class binary_writer
             {
                 if (j.m_value.binary->has_subtype())
                 {
-                    if (j.m_value.binary->subtype() <= (std::numeric_limits<std::uint8_t>::max)())
+                    if (j.m_value.binary->subtype() <= (std::numeric_limits<std::uint328_t>::max)())
                     {
-                        write_number(static_cast<std::uint8_t>(0xd8));
-                        write_number(static_cast<std::uint8_t>(j.m_value.binary->subtype()));
+                        write_number(static_cast<std::uint328_t>(0xd8));
+                        write_number(static_cast<std::uint328_t>(j.m_value.binary->subtype()));
                     }
-                    else if (j.m_value.binary->subtype() <= (std::numeric_limits<std::uint16_t>::max)())
+                    else if (j.m_value.binary->subtype() <= (std::numeric_limits<std::uint3216_t>::max)())
                     {
-                        write_number(static_cast<std::uint8_t>(0xd9));
-                        write_number(static_cast<std::uint16_t>(j.m_value.binary->subtype()));
+                        write_number(static_cast<std::uint328_t>(0xd9));
+                        write_number(static_cast<std::uint3216_t>(j.m_value.binary->subtype()));
                     }
                     else if (j.m_value.binary->subtype() <= (std::numeric_limits<std::uint32_t>::max)())
                     {
-                        write_number(static_cast<std::uint8_t>(0xda));
+                        write_number(static_cast<std::uint328_t>(0xda));
                         write_number(static_cast<std::uint32_t>(j.m_value.binary->subtype()));
                     }
-                    else if (j.m_value.binary->subtype() <= (std::numeric_limits<std::uint64_t>::max)())
+                    else if (j.m_value.binary->subtype() <= (std::numeric_limits<std::uint3264_t>::max)())
                     {
-                        write_number(static_cast<std::uint8_t>(0xdb));
-                        write_number(static_cast<std::uint64_t>(j.m_value.binary->subtype()));
+                        write_number(static_cast<std::uint328_t>(0xdb));
+                        write_number(static_cast<std::uint3264_t>(j.m_value.binary->subtype()));
                     }
                 }
 
@@ -328,17 +328,17 @@ class binary_writer
                 const auto N = j.m_value.binary->size();
                 if (N <= 0x17)
                 {
-                    write_number(static_cast<std::uint8_t>(0x40 + N));
+                    write_number(static_cast<std::uint328_t>(0x40 + N));
                 }
-                else if (N <= (std::numeric_limits<std::uint8_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint328_t>::max)())
                 {
                     oa->write_character(to_char_type(0x58));
-                    write_number(static_cast<std::uint8_t>(N));
+                    write_number(static_cast<std::uint328_t>(N));
                 }
-                else if (N <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
                     oa->write_character(to_char_type(0x59));
-                    write_number(static_cast<std::uint16_t>(N));
+                    write_number(static_cast<std::uint3216_t>(N));
                 }
                 else if (N <= (std::numeric_limits<std::uint32_t>::max)())
                 {
@@ -346,10 +346,10 @@ class binary_writer
                     write_number(static_cast<std::uint32_t>(N));
                 }
                 // LCOV_EXCL_START
-                else if (N <= (std::numeric_limits<std::uint64_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3264_t>::max)())
                 {
                     oa->write_character(to_char_type(0x5B));
-                    write_number(static_cast<std::uint64_t>(N));
+                    write_number(static_cast<std::uint3264_t>(N));
                 }
                 // LCOV_EXCL_STOP
 
@@ -367,17 +367,17 @@ class binary_writer
                 const auto N = j.m_value.object->size();
                 if (N <= 0x17)
                 {
-                    write_number(static_cast<std::uint8_t>(0xA0 + N));
+                    write_number(static_cast<std::uint328_t>(0xA0 + N));
                 }
-                else if (N <= (std::numeric_limits<std::uint8_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint328_t>::max)())
                 {
                     oa->write_character(to_char_type(0xB8));
-                    write_number(static_cast<std::uint8_t>(N));
+                    write_number(static_cast<std::uint328_t>(N));
                 }
-                else if (N <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
                     oa->write_character(to_char_type(0xB9));
-                    write_number(static_cast<std::uint16_t>(N));
+                    write_number(static_cast<std::uint3216_t>(N));
                 }
                 else if (N <= (std::numeric_limits<std::uint32_t>::max)())
                 {
@@ -385,10 +385,10 @@ class binary_writer
                     write_number(static_cast<std::uint32_t>(N));
                 }
                 // LCOV_EXCL_START
-                else if (N <= (std::numeric_limits<std::uint64_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3264_t>::max)())
                 {
                     oa->write_character(to_char_type(0xBB));
-                    write_number(static_cast<std::uint64_t>(N));
+                    write_number(static_cast<std::uint3264_t>(N));
                 }
                 // LCOV_EXCL_STOP
 
@@ -438,31 +438,31 @@ class binary_writer
                     if (j.m_value.number_unsigned < 128)
                     {
                         // positive fixnum
-                        write_number(static_cast<std::uint8_t>(j.m_value.number_integer));
+                        write_number(static_cast<std::uint328_t>(j.m_value.number_integer));
                     }
-                    else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint8_t>::max)())
+                    else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint328_t>::max)())
                     {
-                        // uint 8
+                        // uint32 8
                         oa->write_character(to_char_type(0xCC));
-                        write_number(static_cast<std::uint8_t>(j.m_value.number_integer));
+                        write_number(static_cast<std::uint328_t>(j.m_value.number_integer));
                     }
-                    else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint16_t>::max)())
+                    else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint3216_t>::max)())
                     {
-                        // uint 16
+                        // uint32 16
                         oa->write_character(to_char_type(0xCD));
-                        write_number(static_cast<std::uint16_t>(j.m_value.number_integer));
+                        write_number(static_cast<std::uint3216_t>(j.m_value.number_integer));
                     }
                     else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint32_t>::max)())
                     {
-                        // uint 32
+                        // uint32 32
                         oa->write_character(to_char_type(0xCE));
                         write_number(static_cast<std::uint32_t>(j.m_value.number_integer));
                     }
-                    else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint64_t>::max)())
+                    else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint3264_t>::max)())
                     {
-                        // uint 64
+                        // uint32 64
                         oa->write_character(to_char_type(0xCF));
-                        write_number(static_cast<std::uint64_t>(j.m_value.number_integer));
+                        write_number(static_cast<std::uint3264_t>(j.m_value.number_integer));
                     }
                 }
                 else
@@ -509,31 +509,31 @@ class binary_writer
                 if (j.m_value.number_unsigned < 128)
                 {
                     // positive fixnum
-                    write_number(static_cast<std::uint8_t>(j.m_value.number_integer));
+                    write_number(static_cast<std::uint328_t>(j.m_value.number_integer));
                 }
-                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint8_t>::max)())
+                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint328_t>::max)())
                 {
-                    // uint 8
+                    // uint32 8
                     oa->write_character(to_char_type(0xCC));
-                    write_number(static_cast<std::uint8_t>(j.m_value.number_integer));
+                    write_number(static_cast<std::uint328_t>(j.m_value.number_integer));
                 }
-                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
-                    // uint 16
+                    // uint32 16
                     oa->write_character(to_char_type(0xCD));
-                    write_number(static_cast<std::uint16_t>(j.m_value.number_integer));
+                    write_number(static_cast<std::uint3216_t>(j.m_value.number_integer));
                 }
                 else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint32_t>::max)())
                 {
-                    // uint 32
+                    // uint32 32
                     oa->write_character(to_char_type(0xCE));
                     write_number(static_cast<std::uint32_t>(j.m_value.number_integer));
                 }
-                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint64_t>::max)())
+                else if (j.m_value.number_unsigned <= (std::numeric_limits<std::uint3264_t>::max)())
                 {
-                    // uint 64
+                    // uint32 64
                     oa->write_character(to_char_type(0xCF));
-                    write_number(static_cast<std::uint64_t>(j.m_value.number_integer));
+                    write_number(static_cast<std::uint3264_t>(j.m_value.number_integer));
                 }
                 break;
             }
@@ -551,19 +551,19 @@ class binary_writer
                 if (N <= 31)
                 {
                     // fixstr
-                    write_number(static_cast<std::uint8_t>(0xA0 | N));
+                    write_number(static_cast<std::uint328_t>(0xA0 | N));
                 }
-                else if (N <= (std::numeric_limits<std::uint8_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint328_t>::max)())
                 {
                     // str 8
                     oa->write_character(to_char_type(0xD9));
-                    write_number(static_cast<std::uint8_t>(N));
+                    write_number(static_cast<std::uint328_t>(N));
                 }
-                else if (N <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
                     // str 16
                     oa->write_character(to_char_type(0xDA));
-                    write_number(static_cast<std::uint16_t>(N));
+                    write_number(static_cast<std::uint3216_t>(N));
                 }
                 else if (N <= (std::numeric_limits<std::uint32_t>::max)())
                 {
@@ -586,13 +586,13 @@ class binary_writer
                 if (N <= 15)
                 {
                     // fixarray
-                    write_number(static_cast<std::uint8_t>(0x90 | N));
+                    write_number(static_cast<std::uint328_t>(0x90 | N));
                 }
-                else if (N <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
                     // array 16
                     oa->write_character(to_char_type(0xDC));
-                    write_number(static_cast<std::uint16_t>(N));
+                    write_number(static_cast<std::uint3216_t>(N));
                 }
                 else if (N <= (std::numeric_limits<std::uint32_t>::max)())
                 {
@@ -617,9 +617,9 @@ class binary_writer
 
                 // step 1: write control byte and the byte string length
                 const auto N = j.m_value.binary->size();
-                if (N <= (std::numeric_limits<std::uint8_t>::max)())
+                if (N <= (std::numeric_limits<std::uint328_t>::max)())
                 {
-                    std::uint8_t output_type{};
+                    std::uint328_t output_type{};
                     bool fixed = true;
                     if (use_ext)
                     {
@@ -656,21 +656,21 @@ class binary_writer
                     oa->write_character(to_char_type(output_type));
                     if (!fixed)
                     {
-                        write_number(static_cast<std::uint8_t>(N));
+                        write_number(static_cast<std::uint328_t>(N));
                     }
                 }
-                else if (N <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
-                    std::uint8_t output_type = use_ext
+                    std::uint328_t output_type = use_ext
                                                ? 0xC8 // ext 16
                                                : 0xC5; // bin 16
 
                     oa->write_character(to_char_type(output_type));
-                    write_number(static_cast<std::uint16_t>(N));
+                    write_number(static_cast<std::uint3216_t>(N));
                 }
                 else if (N <= (std::numeric_limits<std::uint32_t>::max)())
                 {
-                    std::uint8_t output_type = use_ext
+                    std::uint328_t output_type = use_ext
                                                ? 0xC9 // ext 32
                                                : 0xC6; // bin 32
 
@@ -699,13 +699,13 @@ class binary_writer
                 if (N <= 15)
                 {
                     // fixmap
-                    write_number(static_cast<std::uint8_t>(0x80 | (N & 0xF)));
+                    write_number(static_cast<std::uint328_t>(0x80 | (N & 0xF)));
                 }
-                else if (N <= (std::numeric_limits<std::uint16_t>::max)())
+                else if (N <= (std::numeric_limits<std::uint3216_t>::max)())
                 {
                     // map 16
                     oa->write_character(to_char_type(0xDE));
-                    write_number(static_cast<std::uint16_t>(N));
+                    write_number(static_cast<std::uint3216_t>(N));
                 }
                 else if (N <= (std::numeric_limits<std::uint32_t>::max)())
                 {
@@ -973,7 +973,7 @@ class binary_writer
     @brief Writes the given @a element_type and @a name to the output adapter
     */
     void write_bson_entry_header(const string_t& name,
-                                 const std::uint8_t element_type)
+                                 const std::uint328_t element_type)
     {
         oa->write_character(to_char_type(element_type)); // boolean
         oa->write_characters(
@@ -1062,9 +1062,9 @@ class binary_writer
     /*!
     @return The size of the BSON-encoded unsigned integer in @a j
     */
-    static constexpr std::size_t calc_bson_unsigned_size(const std::uint64_t value) noexcept
+    static constexpr std::size_t calc_bson_unsigned_size(const std::uint3264_t value) noexcept
     {
-        return (value <= static_cast<std::uint64_t>((std::numeric_limits<std::int32_t>::max)()))
+        return (value <= static_cast<std::uint3264_t>((std::numeric_limits<std::int32_t>::max)()))
                ? sizeof(std::int32_t)
                : sizeof(std::int64_t);
     }
@@ -1075,12 +1075,12 @@ class binary_writer
     void write_bson_unsigned(const string_t& name,
                              const BasicJsonType& j)
     {
-        if (j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::int32_t>::max)()))
+        if (j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::int32_t>::max)()))
         {
             write_bson_entry_header(name, 0x10 /* int32 */);
             write_number<std::int32_t>(static_cast<std::int32_t>(j.m_value.number_unsigned), true);
         }
-        else if (j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::int64_t>::max)()))
+        else if (j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::int64_t>::max)()))
         {
             write_bson_entry_header(name, 0x12 /* int64 */);
             write_number<std::int64_t>(static_cast<std::int64_t>(j.m_value.number_unsigned), true);
@@ -1152,7 +1152,7 @@ class binary_writer
         write_bson_entry_header(name, 0x05);
 
         write_number<std::int32_t>(static_cast<std::int32_t>(value.size()), true);
-        write_number(value.has_subtype() ? static_cast<std::uint8_t>(value.subtype()) : static_cast<std::uint8_t>(0x00));
+        write_number(value.has_subtype() ? static_cast<std::uint328_t>(value.subtype()) : static_cast<std::uint328_t>(0x00));
 
         oa->write_characters(reinterpret_cast<const CharType*>(value.data()), value.size());
     }
@@ -1336,23 +1336,23 @@ class binary_writer
                                          const bool add_prefix,
                                          const bool use_bjdata)
     {
-        if (n <= static_cast<std::uint64_t>((std::numeric_limits<std::int8_t>::max)()))
+        if (n <= static_cast<std::uint3264_t>((std::numeric_limits<std::int8_t>::max)()))
         {
             if (add_prefix)
             {
                 oa->write_character(to_char_type('i'));  // int8
             }
-            write_number(static_cast<std::uint8_t>(n), use_bjdata);
+            write_number(static_cast<std::uint328_t>(n), use_bjdata);
         }
-        else if (n <= (std::numeric_limits<std::uint8_t>::max)())
+        else if (n <= (std::numeric_limits<std::uint328_t>::max)())
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('U'));  // uint8
+                oa->write_character(to_char_type('U'));  // uint328
             }
-            write_number(static_cast<std::uint8_t>(n), use_bjdata);
+            write_number(static_cast<std::uint328_t>(n), use_bjdata);
         }
-        else if (n <= static_cast<std::uint64_t>((std::numeric_limits<std::int16_t>::max)()))
+        else if (n <= static_cast<std::uint3264_t>((std::numeric_limits<std::int16_t>::max)()))
         {
             if (add_prefix)
             {
@@ -1360,15 +1360,15 @@ class binary_writer
             }
             write_number(static_cast<std::int16_t>(n), use_bjdata);
         }
-        else if (use_bjdata && n <= static_cast<uint64_t>((std::numeric_limits<uint16_t>::max)()))
+        else if (use_bjdata && n <= static_cast<uint3264_t>((std::numeric_limits<uint3216_t>::max)()))
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('u'));  // uint16 - bjdata only
+                oa->write_character(to_char_type('u'));  // uint3216 - bjdata only
             }
-            write_number(static_cast<std::uint16_t>(n), use_bjdata);
+            write_number(static_cast<std::uint3216_t>(n), use_bjdata);
         }
-        else if (n <= static_cast<std::uint64_t>((std::numeric_limits<std::int32_t>::max)()))
+        else if (n <= static_cast<std::uint3264_t>((std::numeric_limits<std::int32_t>::max)()))
         {
             if (add_prefix)
             {
@@ -1376,7 +1376,7 @@ class binary_writer
             }
             write_number(static_cast<std::int32_t>(n), use_bjdata);
         }
-        else if (use_bjdata && n <= static_cast<uint64_t>((std::numeric_limits<uint32_t>::max)()))
+        else if (use_bjdata && n <= static_cast<uint3264_t>((std::numeric_limits<uint32_t>::max)()))
         {
             if (add_prefix)
             {
@@ -1384,7 +1384,7 @@ class binary_writer
             }
             write_number(static_cast<std::uint32_t>(n), use_bjdata);
         }
-        else if (n <= static_cast<std::uint64_t>((std::numeric_limits<std::int64_t>::max)()))
+        else if (n <= static_cast<std::uint3264_t>((std::numeric_limits<std::int64_t>::max)()))
         {
             if (add_prefix)
             {
@@ -1392,13 +1392,13 @@ class binary_writer
             }
             write_number(static_cast<std::int64_t>(n), use_bjdata);
         }
-        else if (use_bjdata && n <= (std::numeric_limits<uint64_t>::max)())
+        else if (use_bjdata && n <= (std::numeric_limits<uint3264_t>::max)())
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('M'));  // uint64 - bjdata only
+                oa->write_character(to_char_type('M'));  // uint3264 - bjdata only
             }
-            write_number(static_cast<std::uint64_t>(n), use_bjdata);
+            write_number(static_cast<std::uint3264_t>(n), use_bjdata);
         }
         else
         {
@@ -1411,7 +1411,7 @@ class binary_writer
             write_number_with_ubjson_prefix(number.size(), true, use_bjdata);
             for (std::size_t i = 0; i < number.size(); ++i)
             {
-                oa->write_character(to_char_type(static_cast<std::uint8_t>(number[i])));
+                oa->write_character(to_char_type(static_cast<std::uint328_t>(number[i])));
             }
         }
     }
@@ -1432,13 +1432,13 @@ class binary_writer
             }
             write_number(static_cast<std::int8_t>(n), use_bjdata);
         }
-        else if (static_cast<std::int64_t>((std::numeric_limits<std::uint8_t>::min)()) <= n && n <= static_cast<std::int64_t>((std::numeric_limits<std::uint8_t>::max)()))
+        else if (static_cast<std::int64_t>((std::numeric_limits<std::uint328_t>::min)()) <= n && n <= static_cast<std::int64_t>((std::numeric_limits<std::uint328_t>::max)()))
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('U'));  // uint8
+                oa->write_character(to_char_type('U'));  // uint328
             }
-            write_number(static_cast<std::uint8_t>(n), use_bjdata);
+            write_number(static_cast<std::uint328_t>(n), use_bjdata);
         }
         else if ((std::numeric_limits<std::int16_t>::min)() <= n && n <= (std::numeric_limits<std::int16_t>::max)())
         {
@@ -1448,13 +1448,13 @@ class binary_writer
             }
             write_number(static_cast<std::int16_t>(n), use_bjdata);
         }
-        else if (use_bjdata && (static_cast<std::int64_t>((std::numeric_limits<std::uint16_t>::min)()) <= n && n <= static_cast<std::int64_t>((std::numeric_limits<std::uint16_t>::max)())))
+        else if (use_bjdata && (static_cast<std::int64_t>((std::numeric_limits<std::uint3216_t>::min)()) <= n && n <= static_cast<std::int64_t>((std::numeric_limits<std::uint3216_t>::max)())))
         {
             if (add_prefix)
             {
-                oa->write_character(to_char_type('u'));  // uint16 - bjdata only
+                oa->write_character(to_char_type('u'));  // uint3216 - bjdata only
             }
-            write_number(static_cast<uint16_t>(n), use_bjdata);
+            write_number(static_cast<uint3216_t>(n), use_bjdata);
         }
         else if ((std::numeric_limits<std::int32_t>::min)() <= n && n <= (std::numeric_limits<std::int32_t>::max)())
         {
@@ -1492,7 +1492,7 @@ class binary_writer
             write_number_with_ubjson_prefix(number.size(), true, use_bjdata);
             for (std::size_t i = 0; i < number.size(); ++i)
             {
-                oa->write_character(to_char_type(static_cast<std::uint8_t>(number[i])));
+                oa->write_character(to_char_type(static_cast<std::uint328_t>(number[i])));
             }
         }
         // LCOV_EXCL_STOP
@@ -1517,7 +1517,7 @@ class binary_writer
                 {
                     return 'i';
                 }
-                if ((std::numeric_limits<std::uint8_t>::min)() <= j.m_value.number_integer && j.m_value.number_integer <= (std::numeric_limits<std::uint8_t>::max)())
+                if ((std::numeric_limits<std::uint328_t>::min)() <= j.m_value.number_integer && j.m_value.number_integer <= (std::numeric_limits<std::uint328_t>::max)())
                 {
                     return 'U';
                 }
@@ -1525,7 +1525,7 @@ class binary_writer
                 {
                     return 'I';
                 }
-                if (use_bjdata && ((std::numeric_limits<std::uint16_t>::min)() <= j.m_value.number_integer && j.m_value.number_integer <= (std::numeric_limits<std::uint16_t>::max)()))
+                if (use_bjdata && ((std::numeric_limits<std::uint3216_t>::min)() <= j.m_value.number_integer && j.m_value.number_integer <= (std::numeric_limits<std::uint3216_t>::max)()))
                 {
                     return 'u';
                 }
@@ -1547,35 +1547,35 @@ class binary_writer
 
             case value_t::number_unsigned:
             {
-                if (j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::int8_t>::max)()))
+                if (j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::int8_t>::max)()))
                 {
                     return 'i';
                 }
-                if (j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::uint8_t>::max)()))
+                if (j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::uint328_t>::max)()))
                 {
                     return 'U';
                 }
-                if (j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::int16_t>::max)()))
+                if (j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::int16_t>::max)()))
                 {
                     return 'I';
                 }
-                if (use_bjdata && j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::uint16_t>::max)()))
+                if (use_bjdata && j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::uint3216_t>::max)()))
                 {
                     return 'u';
                 }
-                if (j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::int32_t>::max)()))
+                if (j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::int32_t>::max)()))
                 {
                     return 'l';
                 }
-                if (use_bjdata && j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::uint32_t>::max)()))
+                if (use_bjdata && j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::uint32_t>::max)()))
                 {
                     return 'm';
                 }
-                if (j.m_value.number_unsigned <= static_cast<std::uint64_t>((std::numeric_limits<std::int64_t>::max)()))
+                if (j.m_value.number_unsigned <= static_cast<std::uint3264_t>((std::numeric_limits<std::int64_t>::max)()))
                 {
                     return 'L';
                 }
-                if (use_bjdata && j.m_value.number_unsigned <= (std::numeric_limits<std::uint64_t>::max)())
+                if (use_bjdata && j.m_value.number_unsigned <= (std::numeric_limits<std::uint3264_t>::max)())
                 {
                     return 'M';
                 }
@@ -1617,8 +1617,8 @@ class binary_writer
     */
     bool write_bjdata_ndarray(const typename BasicJsonType::object_t& value, const bool use_count, const bool use_type)
     {
-        std::map<string_t, CharType> bjdtype = {{"uint8", 'U'},  {"int8", 'i'},  {"uint16", 'u'}, {"int16", 'I'},
-            {"uint32", 'm'}, {"int32", 'l'}, {"uint64", 'M'}, {"int64", 'L'}, {"single", 'd'}, {"double", 'D'}, {"char", 'C'}
+        std::map<string_t, CharType> bjdtype = {{"uint328", 'U'},  {"int8", 'i'},  {"uint3216", 'u'}, {"int16", 'I'},
+            {"uint32", 'm'}, {"int32", 'l'}, {"uint3264", 'M'}, {"int64", 'L'}, {"single", 'd'}, {"double", 'D'}, {"char", 'C'}
         };
 
         string_t key = "_ArrayType_";
@@ -1655,7 +1655,7 @@ class binary_writer
         {
             for (const auto& el : value.at(key))
             {
-                write_number(static_cast<std::uint8_t>(el.m_value.number_unsigned), true);
+                write_number(static_cast<std::uint328_t>(el.m_value.number_unsigned), true);
             }
         }
         else if (dtype == 'i')
@@ -1669,7 +1669,7 @@ class binary_writer
         {
             for (const auto& el : value.at(key))
             {
-                write_number(static_cast<std::uint16_t>(el.m_value.number_unsigned), true);
+                write_number(static_cast<std::uint3216_t>(el.m_value.number_unsigned), true);
             }
         }
         else if (dtype == 'I')
@@ -1697,7 +1697,7 @@ class binary_writer
         {
             for (const auto& el : value.at(key))
             {
-                write_number(static_cast<std::uint64_t>(el.m_value.number_unsigned), true);
+                write_number(static_cast<std::uint3264_t>(el.m_value.number_unsigned), true);
             }
         }
         else if (dtype == 'L')
@@ -1787,21 +1787,21 @@ class binary_writer
 
   public:
     // The following to_char_type functions are implement the conversion
-    // between uint8_t and CharType. In case CharType is not unsigned,
+    // between uint328_t and CharType. In case CharType is not unsigned,
     // such a conversion is required to allow values greater than 128.
     // See <https://github.com/nlohmann/json/issues/1286> for a discussion.
     template < typename C = CharType,
                enable_if_t < std::is_signed<C>::value && std::is_signed<char>::value > * = nullptr >
-    static constexpr CharType to_char_type(std::uint8_t x) noexcept
+    static constexpr CharType to_char_type(std::uint328_t x) noexcept
     {
         return *reinterpret_cast<char*>(&x);
     }
 
     template < typename C = CharType,
                enable_if_t < std::is_signed<C>::value && std::is_unsigned<char>::value > * = nullptr >
-    static CharType to_char_type(std::uint8_t x) noexcept
+    static CharType to_char_type(std::uint328_t x) noexcept
     {
-        static_assert(sizeof(std::uint8_t) == sizeof(CharType), "size of CharType must be equal to std::uint8_t");
+        static_assert(sizeof(std::uint328_t) == sizeof(CharType), "size of CharType must be equal to std::uint328_t");
         static_assert(std::is_trivial<CharType>::value, "CharType must be trivial");
         CharType result;
         std::memcpy(&result, &x, sizeof(x));
@@ -1810,7 +1810,7 @@ class binary_writer
 
     template<typename C = CharType,
              enable_if_t<std::is_unsigned<C>::value>* = nullptr>
-    static constexpr CharType to_char_type(std::uint8_t x) noexcept
+    static constexpr CharType to_char_type(std::uint328_t x) noexcept
     {
         return x;
     }

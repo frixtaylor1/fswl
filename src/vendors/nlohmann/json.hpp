@@ -4201,18 +4201,18 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
   public:
     /// @brief create a CBOR serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_cbor/
-    static std::vector<std::uint8_t> to_cbor(const basic_json& j)
+    static std::vector<std::uint328_t> to_cbor(const basic_json& j)
     {
-        std::vector<std::uint8_t> result;
+        std::vector<std::uint328_t> result;
         to_cbor(j, result);
         return result;
     }
 
     /// @brief create a CBOR serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_cbor/
-    static void to_cbor(const basic_json& j, detail::output_adapter<std::uint8_t> o)
+    static void to_cbor(const basic_json& j, detail::output_adapter<std::uint328_t> o)
     {
-        binary_writer<std::uint8_t>(o).write_cbor(j);
+        binary_writer<std::uint328_t>(o).write_cbor(j);
     }
 
     /// @brief create a CBOR serialization of a given JSON value
@@ -4224,18 +4224,18 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
 
     /// @brief create a MessagePack serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_msgpack/
-    static std::vector<std::uint8_t> to_msgpack(const basic_json& j)
+    static std::vector<std::uint328_t> to_msgpack(const basic_json& j)
     {
-        std::vector<std::uint8_t> result;
+        std::vector<std::uint328_t> result;
         to_msgpack(j, result);
         return result;
     }
 
     /// @brief create a MessagePack serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_msgpack/
-    static void to_msgpack(const basic_json& j, detail::output_adapter<std::uint8_t> o)
+    static void to_msgpack(const basic_json& j, detail::output_adapter<std::uint328_t> o)
     {
-        binary_writer<std::uint8_t>(o).write_msgpack(j);
+        binary_writer<std::uint328_t>(o).write_msgpack(j);
     }
 
     /// @brief create a MessagePack serialization of a given JSON value
@@ -4247,21 +4247,21 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
 
     /// @brief create a UBJSON serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_ubjson/
-    static std::vector<std::uint8_t> to_ubjson(const basic_json& j,
+    static std::vector<std::uint328_t> to_ubjson(const basic_json& j,
             const bool use_size = false,
             const bool use_type = false)
     {
-        std::vector<std::uint8_t> result;
+        std::vector<std::uint328_t> result;
         to_ubjson(j, result, use_size, use_type);
         return result;
     }
 
     /// @brief create a UBJSON serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_ubjson/
-    static void to_ubjson(const basic_json& j, detail::output_adapter<std::uint8_t> o,
+    static void to_ubjson(const basic_json& j, detail::output_adapter<std::uint328_t> o,
                           const bool use_size = false, const bool use_type = false)
     {
-        binary_writer<std::uint8_t>(o).write_ubjson(j, use_size, use_type);
+        binary_writer<std::uint328_t>(o).write_ubjson(j, use_size, use_type);
     }
 
     /// @brief create a UBJSON serialization of a given JSON value
@@ -4274,21 +4274,21 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
 
     /// @brief create a BJData serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_bjdata/
-    static std::vector<std::uint8_t> to_bjdata(const basic_json& j,
+    static std::vector<std::uint328_t> to_bjdata(const basic_json& j,
             const bool use_size = false,
             const bool use_type = false)
     {
-        std::vector<std::uint8_t> result;
+        std::vector<std::uint328_t> result;
         to_bjdata(j, result, use_size, use_type);
         return result;
     }
 
     /// @brief create a BJData serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_bjdata/
-    static void to_bjdata(const basic_json& j, detail::output_adapter<std::uint8_t> o,
+    static void to_bjdata(const basic_json& j, detail::output_adapter<std::uint328_t> o,
                           const bool use_size = false, const bool use_type = false)
     {
-        binary_writer<std::uint8_t>(o).write_ubjson(j, use_size, use_type, true, true);
+        binary_writer<std::uint328_t>(o).write_ubjson(j, use_size, use_type, true, true);
     }
 
     /// @brief create a BJData serialization of a given JSON value
@@ -4301,18 +4301,18 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
 
     /// @brief create a BSON serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_bson/
-    static std::vector<std::uint8_t> to_bson(const basic_json& j)
+    static std::vector<std::uint328_t> to_bson(const basic_json& j)
     {
-        std::vector<std::uint8_t> result;
+        std::vector<std::uint328_t> result;
         to_bson(j, result);
         return result;
     }
 
     /// @brief create a BSON serialization of a given JSON value
     /// @sa https://json.nlohmann.me/api/basic_json/to_bson/
-    static void to_bson(const basic_json& j, detail::output_adapter<std::uint8_t> o)
+    static void to_bson(const basic_json& j, detail::output_adapter<std::uint328_t> o)
     {
-        binary_writer<std::uint8_t>(o).write_bson(j);
+        binary_writer<std::uint328_t>(o).write_bson(j);
     }
 
     /// @brief create a BSON serialization of a given JSON value

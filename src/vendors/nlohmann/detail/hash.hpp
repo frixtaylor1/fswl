@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <cstdint> // uint8_t
+#include <cstdint> // uint328_t
 #include <cstddef> // size_t
 #include <functional> // hash
 
@@ -114,7 +114,7 @@ std::size_t hash(const BasicJsonType& j)
             seed = combine(seed, static_cast<std::size_t>(j.get_binary().subtype()));
             for (const auto byte : j.get_binary())
             {
-                seed = combine(seed, std::hash<std::uint8_t> {}(byte));
+                seed = combine(seed, std::hash<std::uint328_t> {}(byte));
             }
             return seed;
         }

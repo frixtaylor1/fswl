@@ -16,7 +16,7 @@
  * Current complexity: O(1) average for lookups, O(n) worst case for hash collisions.
  * Better performance than linear search-based containers for large datasets.
  */
-template< class KeyType, class ValueType, uint CAPACITY = 128 >
+template< class KeyType, class ValueType, uint32 CAPACITY = 128 >
 struct HashAssociativeContainer {
     
     struct Entry {
@@ -26,14 +26,14 @@ struct HashAssociativeContainer {
     };
     
     Entry**           table;
-    uint              entryCount;
-    uint              bucketCount;
-    uint              capacity;
+    uint32              entryCount;
+    uint32              bucketCount;
+    uint32              capacity;
     PoolAllocator*    allocator;
 
     struct Iterator {
         HashAssociativeContainer* self;
-        uint                      currentBucket;
+        uint32                      currentBucket;
         Entry*                    currentEntry;
 
         void                  init(HashAssociativeContainer* container);
@@ -52,16 +52,16 @@ struct HashAssociativeContainer {
 
     /** Query family functions... */
     bool             exists(const KeyType& key) const;
-    const KeyType&   getKeyAt(uint idx) const;
-    KeyType&         getKeyAt(uint idx);
+    const KeyType&   getKeyAt(uint32 idx) const;
+    KeyType&         getKeyAt(uint32 idx);
     ValueType&       at(const KeyType& key);
     const ValueType& at(const KeyType& key) const;
     ValueType&       getValue(const KeyType& key);
     const ValueType& getValue(const KeyType& key) const;
-    const ValueType& getValueAt(uint idx) const;
-    ValueType&       getValueAt(uint idx);
+    const ValueType& getValueAt(uint32 idx) const;
+    ValueType&       getValueAt(uint32 idx);
     KeyType&         end(void);
-    uint             length(void) const;
+    uint32             length(void) const;
     
     /** Modify family functions... */
     bool             remove(const KeyType& key);
@@ -69,20 +69,20 @@ struct HashAssociativeContainer {
 
 private:
     Entry*            _findEntry(const KeyType& key) const;
-    uint              _hash(const KeyType& key) const;
+    uint32              _hash(const KeyType& key) const;
     void              _deleteChain(Entry* entry);
 };
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::HashAssociativeContainer()
     : entryCount(0), bucketCount(CAPACITY), capacity(CAPACITY), allocator(nullptr) {
     table = new Entry*[CAPACITY]();
-    for (uint i = 0; i < CAPACITY; ++i) {
+    for (uint32 i = 0; i < CAPACITY; ++i) {
         table[i] = nullptr;
     }
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::HashAssociativeContainer(PoolAllocator* poolAlloc)
     : entryCount(0), bucketCount(CAPACITY), capacity(CAPACITY), allocator(poolAlloc) {
     if (allocator != nullptr) {
@@ -90,12 +90,12 @@ HashAssociativeContainer< KeyType, ValueType, CAPACITY >::HashAssociativeContain
     } else {
         table = new Entry*[CAPACITY]();
     }
-    for (uint i = 0; i < CAPACITY; ++i) {
+    for (uint32 i = 0; i < CAPACITY; ++i) {
         table[i] = nullptr;
     }
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::~HashAssociativeContainer() {
     clear();
     if (allocator != nullptr) {
@@ -106,12 +106,12 @@ HashAssociativeContainer< KeyType, ValueType, CAPACITY >::~HashAssociativeContai
     table = nullptr;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-uint HashAssociativeContainer< KeyType, ValueType, CAPACITY >::_hash(const KeyType& key) const {
+template< class KeyType, class ValueType, uint32 CAPACITY >
+uint32 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::_hash(const KeyType& key) const {
     // Simple hash function for integer types
     // For custom types, specialize this function
     if constexpr (std::is_integral_v<KeyType>) {
-        return (static_cast<uint>(key) * 2654435761U) % bucketCount;
+        return (static_cast<uint32>(key) * 2654435761U) % bucketCount;
     } else {
         // Fallback for non-integral types
         // This is a basic implementation - can be optimized
@@ -119,10 +119,10 @@ uint HashAssociativeContainer< KeyType, ValueType, CAPACITY >::_hash(const KeyTy
     }
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 typename HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Entry*
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::_findEntry(const KeyType& key) const {
-    uint hashIdx = _hash(key);
+    uint32 hashIdx = _hash(key);
     Entry* entry = table[hashIdx];
     
     while (entry != nullptr) {
@@ -135,7 +135,7 @@ HashAssociativeContainer< KeyType, ValueType, CAPACITY >::_findEntry(const KeyTy
     return nullptr;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 void HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::init(
     HashAssociativeContainer< KeyType, ValueType, CAPACITY >* container) {
     self = container;
@@ -143,13 +143,13 @@ void HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::init(
     currentEntry = nullptr;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator&
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::begin(void) {
     currentBucket = 0;
     currentEntry = nullptr;
     
-    for (uint i = 0; i < self->bucketCount; ++i) {
+    for (uint32 i = 0; i < self->bucketCount; ++i) {
         if (self->table[i] != nullptr) {
             currentBucket = i;
             currentEntry = self->table[i];
@@ -160,7 +160,7 @@ HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::begin(void) 
     return *this;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::end(void) {
     Iterator it;
@@ -171,7 +171,7 @@ HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::end(void) {
     return it;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 typename HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator&
 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::next(void) {
     if (currentEntry == nullptr) {
@@ -186,7 +186,7 @@ HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::next(void) {
     currentBucket++;
     currentEntry = nullptr;
     
-    for (uint i = currentBucket; i < self->bucketCount; ++i) {
+    for (uint32 i = currentBucket; i < self->bucketCount; ++i) {
         if (self->table[i] != nullptr) {
             currentBucket = i;
             currentEntry = self->table[i];
@@ -198,17 +198,17 @@ HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::next(void) {
     return *this;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 KeyType* HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::key(void) {
     return currentEntry != nullptr ? currentEntry->key : nullptr;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 ValueType* HashAssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::value(void) {
     return currentEntry != nullptr ? currentEntry->value : nullptr;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::add(
     const KeyType& key, const ValueType& value) {
     
@@ -257,7 +257,7 @@ ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::add(
     new (newEntry->key) KeyType(key);
     new (newEntry->value) ValueType(value);
     
-    uint hashIdx = _hash(key);
+    uint32 hashIdx = _hash(key);
     
     newEntry->next = table[hashIdx];
     table[hashIdx] = newEntry;
@@ -266,16 +266,16 @@ ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::add(
     return *(newEntry->value);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 bool HashAssociativeContainer< KeyType, ValueType, CAPACITY >::exists(const KeyType& key) const {
     return _findEntry(key) != nullptr;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-KeyType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint idx) {
-    uint count = 0;
+template< class KeyType, class ValueType, uint32 CAPACITY >
+KeyType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint32 idx) {
+    uint32 count = 0;
     
-    for (uint i = 0; i < bucketCount; ++i) {
+    for (uint32 i = 0; i < bucketCount; ++i) {
         Entry* entry = table[i];
         while (entry != nullptr) {
             if (count == idx) {
@@ -290,11 +290,11 @@ KeyType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint
     return dummy;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-const KeyType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint idx) const {
-    uint count = 0;
+template< class KeyType, class ValueType, uint32 CAPACITY >
+const KeyType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint32 idx) const {
+    uint32 count = 0;
     
-    for (uint i = 0; i < bucketCount; ++i) {
+    for (uint32 i = 0; i < bucketCount; ++i) {
         Entry* entry = table[i];
         while (entry != nullptr) {
             if (count == idx) {
@@ -309,7 +309,7 @@ const KeyType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyA
     return dummy;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::at(const KeyType& key) {
     Entry* entry = _findEntry(key);
     
@@ -321,7 +321,7 @@ ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::at(const Ke
     return dummy;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 const ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::at(const KeyType& key) const {
     Entry* entry = _findEntry(key);
     
@@ -333,21 +333,21 @@ const ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::at(co
     return dummy;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const KeyType& key) {
     return at(key);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 const ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const KeyType& key) const {
     return at(key);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-const ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint idx) const {
-    uint count = 0;
+template< class KeyType, class ValueType, uint32 CAPACITY >
+const ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint32 idx) const {
+    uint32 count = 0;
     
-    for (uint i = 0; i < bucketCount; ++i) {
+    for (uint32 i = 0; i < bucketCount; ++i) {
         Entry* entry = table[i];
         while (entry != nullptr) {
             if (count == idx) {
@@ -362,11 +362,11 @@ const ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getVa
     return dummy;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint idx) {
-    uint count = 0;
+template< class KeyType, class ValueType, uint32 CAPACITY >
+ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint32 idx) {
+    uint32 count = 0;
     
-    for (uint i = 0; i < bucketCount; ++i) {
+    for (uint32 i = 0; i < bucketCount; ++i) {
         Entry* entry = table[i];
         while (entry != nullptr) {
             if (count == idx) {
@@ -381,20 +381,20 @@ ValueType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(
     return dummy;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 KeyType& HashAssociativeContainer< KeyType, ValueType, CAPACITY >::end(void) {
     static KeyType dummy;
     return dummy;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-uint HashAssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) const {
+template< class KeyType, class ValueType, uint32 CAPACITY >
+uint32 HashAssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) const {
     return entryCount;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 bool HashAssociativeContainer< KeyType, ValueType, CAPACITY >::remove(const KeyType& key) {
-    uint hashIdx = _hash(key);
+    uint32 hashIdx = _hash(key);
     Entry* entry = table[hashIdx];
     Entry* prev = nullptr;
     
@@ -430,7 +430,7 @@ bool HashAssociativeContainer< KeyType, ValueType, CAPACITY >::remove(const KeyT
     return false;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 void HashAssociativeContainer< KeyType, ValueType, CAPACITY >::_deleteChain(Entry* entry) {
     while (entry != nullptr) {
         Entry* next = entry->next;
@@ -452,9 +452,9 @@ void HashAssociativeContainer< KeyType, ValueType, CAPACITY >::_deleteChain(Entr
     }
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 void HashAssociativeContainer< KeyType, ValueType, CAPACITY >::clear(void) {
-    for (uint i = 0; i < bucketCount; ++i) {
+    for (uint32 i = 0; i < bucketCount; ++i) {
         if (table[i] != nullptr) {
             _deleteChain(table[i]);
             table[i] = nullptr;

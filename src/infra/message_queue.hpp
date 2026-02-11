@@ -3,7 +3,7 @@
 
 #include "../stl/collection.hpp"
 
-template< class PayloadType, uint CAPACITY >
+template< class PayloadType, uint32 CAPACITY >
 class MessageQueue {
 public:
     Collection< PayloadType, CAPACITY > queue;

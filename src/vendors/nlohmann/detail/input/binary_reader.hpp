@@ -12,7 +12,7 @@
 #include <array> // array
 #include <cmath> // ldexp
 #include <cstddef> // size_t
-#include <cstdint> // uint8_t, uint16_t, uint32_t, uint64_t
+#include <cstdint> // uint328_t, uint3216_t, uint32_t, uint3264_t
 #include <cstdio> // snprintf
 #include <cstring> // memcpy
 #include <iterator> // back_inserter
@@ -252,8 +252,8 @@ class binary_reader
         }
 
         // All BSON binary values have a subtype
-        std::uint8_t subtype{};
-        get_number<std::uint8_t>(input_format_t::bson, subtype);
+        std::uint328_t subtype{};
+        get_number<std::uint328_t>(input_format_t::bson, subtype);
         result.set_subtype(subtype);
 
         return get_binary(input_format_t::bson, len, result);
@@ -453,15 +453,15 @@ class binary_reader
             case 0x17:
                 return sax->number_unsigned(static_cast<number_unsigned_t>(current));
 
-            case 0x18: // Unsigned integer (one-byte uint8_t follows)
+            case 0x18: // Unsigned integer (one-byte uint328_t follows)
             {
-                std::uint8_t number{};
+                std::uint328_t number{};
                 return get_number(input_format_t::cbor, number) && sax->number_unsigned(number);
             }
 
-            case 0x19: // Unsigned integer (two-byte uint16_t follows)
+            case 0x19: // Unsigned integer (two-byte uint3216_t follows)
             {
-                std::uint16_t number{};
+                std::uint3216_t number{};
                 return get_number(input_format_t::cbor, number) && sax->number_unsigned(number);
             }
 
@@ -471,9 +471,9 @@ class binary_reader
                 return get_number(input_format_t::cbor, number) && sax->number_unsigned(number);
             }
 
-            case 0x1B: // Unsigned integer (eight-byte uint64_t follows)
+            case 0x1B: // Unsigned integer (eight-byte uint3264_t follows)
             {
-                std::uint64_t number{};
+                std::uint3264_t number{};
                 return get_number(input_format_t::cbor, number) && sax->number_unsigned(number);
             }
 
@@ -504,15 +504,15 @@ class binary_reader
             case 0x37:
                 return sax->number_integer(static_cast<std::int8_t>(0x20 - 1 - current));
 
-            case 0x38: // Negative integer (one-byte uint8_t follows)
+            case 0x38: // Negative integer (one-byte uint328_t follows)
             {
-                std::uint8_t number{};
+                std::uint328_t number{};
                 return get_number(input_format_t::cbor, number) && sax->number_integer(static_cast<number_integer_t>(-1) - number);
             }
 
-            case 0x39: // Negative integer -1-n (two-byte uint16_t follows)
+            case 0x39: // Negative integer -1-n (two-byte uint3216_t follows)
             {
-                std::uint16_t number{};
+                std::uint3216_t number{};
                 return get_number(input_format_t::cbor, number) && sax->number_integer(static_cast<number_integer_t>(-1) - number);
             }
 
@@ -522,9 +522,9 @@ class binary_reader
                 return get_number(input_format_t::cbor, number) && sax->number_integer(static_cast<number_integer_t>(-1) - number);
             }
 
-            case 0x3B: // Negative integer -1-n (eight-byte uint64_t follows)
+            case 0x3B: // Negative integer -1-n (eight-byte uint3264_t follows)
             {
-                std::uint64_t number{};
+                std::uint3264_t number{};
                 return get_number(input_format_t::cbor, number) && sax->number_integer(static_cast<number_integer_t>(-1)
                         - static_cast<number_integer_t>(number));
             }
@@ -554,10 +554,10 @@ class binary_reader
             case 0x55:
             case 0x56:
             case 0x57:
-            case 0x58: // Binary data (one-byte uint8_t for n follows)
-            case 0x59: // Binary data (two-byte uint16_t for n follow)
+            case 0x58: // Binary data (one-byte uint328_t for n follows)
+            case 0x59: // Binary data (two-byte uint3216_t for n follow)
             case 0x5A: // Binary data (four-byte uint32_t for n follow)
-            case 0x5B: // Binary data (eight-byte uint64_t for n follow)
+            case 0x5B: // Binary data (eight-byte uint3264_t for n follow)
             case 0x5F: // Binary data (indefinite length)
             {
                 binary_t b;
@@ -589,10 +589,10 @@ class binary_reader
             case 0x75:
             case 0x76:
             case 0x77:
-            case 0x78: // UTF-8 string (one-byte uint8_t for n follows)
-            case 0x79: // UTF-8 string (two-byte uint16_t for n follow)
+            case 0x78: // UTF-8 string (one-byte uint328_t for n follows)
+            case 0x79: // UTF-8 string (two-byte uint3216_t for n follow)
             case 0x7A: // UTF-8 string (four-byte uint32_t for n follow)
-            case 0x7B: // UTF-8 string (eight-byte uint64_t for n follow)
+            case 0x7B: // UTF-8 string (eight-byte uint3264_t for n follow)
             case 0x7F: // UTF-8 string (indefinite length)
             {
                 string_t s;
@@ -627,15 +627,15 @@ class binary_reader
                 return get_cbor_array(
                            conditional_static_cast<std::size_t>(static_cast<unsigned int>(current) & 0x1Fu), tag_handler);
 
-            case 0x98: // array (one-byte uint8_t for n follows)
+            case 0x98: // array (one-byte uint328_t for n follows)
             {
-                std::uint8_t len{};
+                std::uint328_t len{};
                 return get_number(input_format_t::cbor, len) && get_cbor_array(static_cast<std::size_t>(len), tag_handler);
             }
 
-            case 0x99: // array (two-byte uint16_t for n follow)
+            case 0x99: // array (two-byte uint3216_t for n follow)
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format_t::cbor, len) && get_cbor_array(static_cast<std::size_t>(len), tag_handler);
             }
 
@@ -645,9 +645,9 @@ class binary_reader
                 return get_number(input_format_t::cbor, len) && get_cbor_array(conditional_static_cast<std::size_t>(len), tag_handler);
             }
 
-            case 0x9B: // array (eight-byte uint64_t for n follow)
+            case 0x9B: // array (eight-byte uint3264_t for n follow)
             {
-                std::uint64_t len{};
+                std::uint3264_t len{};
                 return get_number(input_format_t::cbor, len) && get_cbor_array(conditional_static_cast<std::size_t>(len), tag_handler);
             }
 
@@ -681,15 +681,15 @@ class binary_reader
             case 0xB7:
                 return get_cbor_object(conditional_static_cast<std::size_t>(static_cast<unsigned int>(current) & 0x1Fu), tag_handler);
 
-            case 0xB8: // map (one-byte uint8_t for n follows)
+            case 0xB8: // map (one-byte uint328_t for n follows)
             {
-                std::uint8_t len{};
+                std::uint328_t len{};
                 return get_number(input_format_t::cbor, len) && get_cbor_object(static_cast<std::size_t>(len), tag_handler);
             }
 
-            case 0xB9: // map (two-byte uint16_t for n follow)
+            case 0xB9: // map (two-byte uint3216_t for n follow)
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format_t::cbor, len) && get_cbor_object(static_cast<std::size_t>(len), tag_handler);
             }
 
@@ -699,9 +699,9 @@ class binary_reader
                 return get_number(input_format_t::cbor, len) && get_cbor_object(conditional_static_cast<std::size_t>(len), tag_handler);
             }
 
-            case 0xBB: // map (eight-byte uint64_t for n follow)
+            case 0xBB: // map (eight-byte uint3264_t for n follow)
             {
-                std::uint64_t len{};
+                std::uint3264_t len{};
                 return get_number(input_format_t::cbor, len) && get_cbor_object(conditional_static_cast<std::size_t>(len), tag_handler);
             }
 
@@ -744,13 +744,13 @@ class binary_reader
                         {
                             case 0xD8:
                             {
-                                std::uint8_t subtype_to_ignore{};
+                                std::uint328_t subtype_to_ignore{};
                                 get_number(input_format_t::cbor, subtype_to_ignore);
                                 break;
                             }
                             case 0xD9:
                             {
-                                std::uint16_t subtype_to_ignore{};
+                                std::uint3216_t subtype_to_ignore{};
                                 get_number(input_format_t::cbor, subtype_to_ignore);
                                 break;
                             }
@@ -762,7 +762,7 @@ class binary_reader
                             }
                             case 0xDB:
                             {
-                                std::uint64_t subtype_to_ignore{};
+                                std::uint3264_t subtype_to_ignore{};
                                 get_number(input_format_t::cbor, subtype_to_ignore);
                                 break;
                             }
@@ -780,14 +780,14 @@ class binary_reader
                         {
                             case 0xD8:
                             {
-                                std::uint8_t subtype{};
+                                std::uint328_t subtype{};
                                 get_number(input_format_t::cbor, subtype);
                                 b.set_subtype(detail::conditional_static_cast<typename binary_t::subtype_type>(subtype));
                                 break;
                             }
                             case 0xD9:
                             {
-                                std::uint16_t subtype{};
+                                std::uint3216_t subtype{};
                                 get_number(input_format_t::cbor, subtype);
                                 b.set_subtype(detail::conditional_static_cast<typename binary_t::subtype_type>(subtype));
                                 break;
@@ -801,7 +801,7 @@ class binary_reader
                             }
                             case 0xDB:
                             {
-                                std::uint64_t subtype{};
+                                std::uint3264_t subtype{};
                                 get_number(input_format_t::cbor, subtype);
                                 b.set_subtype(detail::conditional_static_cast<typename binary_t::subtype_type>(subtype));
                                 break;
@@ -946,15 +946,15 @@ class binary_reader
                 return get_string(input_format_t::cbor, static_cast<unsigned int>(current) & 0x1Fu, result);
             }
 
-            case 0x78: // UTF-8 string (one-byte uint8_t for n follows)
+            case 0x78: // UTF-8 string (one-byte uint328_t for n follows)
             {
-                std::uint8_t len{};
+                std::uint328_t len{};
                 return get_number(input_format_t::cbor, len) && get_string(input_format_t::cbor, len, result);
             }
 
-            case 0x79: // UTF-8 string (two-byte uint16_t for n follow)
+            case 0x79: // UTF-8 string (two-byte uint3216_t for n follow)
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format_t::cbor, len) && get_string(input_format_t::cbor, len, result);
             }
 
@@ -964,9 +964,9 @@ class binary_reader
                 return get_number(input_format_t::cbor, len) && get_string(input_format_t::cbor, len, result);
             }
 
-            case 0x7B: // UTF-8 string (eight-byte uint64_t for n follow)
+            case 0x7B: // UTF-8 string (eight-byte uint3264_t for n follow)
             {
-                std::uint64_t len{};
+                std::uint3264_t len{};
                 return get_number(input_format_t::cbor, len) && get_string(input_format_t::cbor, len, result);
             }
 
@@ -1042,16 +1042,16 @@ class binary_reader
                 return get_binary(input_format_t::cbor, static_cast<unsigned int>(current) & 0x1Fu, result);
             }
 
-            case 0x58: // Binary data (one-byte uint8_t for n follows)
+            case 0x58: // Binary data (one-byte uint328_t for n follows)
             {
-                std::uint8_t len{};
+                std::uint328_t len{};
                 return get_number(input_format_t::cbor, len) &&
                        get_binary(input_format_t::cbor, len, result);
             }
 
-            case 0x59: // Binary data (two-byte uint16_t for n follow)
+            case 0x59: // Binary data (two-byte uint3216_t for n follow)
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format_t::cbor, len) &&
                        get_binary(input_format_t::cbor, len, result);
             }
@@ -1063,9 +1063,9 @@ class binary_reader
                        get_binary(input_format_t::cbor, len, result);
             }
 
-            case 0x5B: // Binary data (eight-byte uint64_t for n follow)
+            case 0x5B: // Binary data (eight-byte uint3264_t for n follow)
             {
-                std::uint64_t len{};
+                std::uint3264_t len{};
                 return get_number(input_format_t::cbor, len) &&
                        get_binary(input_format_t::cbor, len, result);
             }
@@ -1448,27 +1448,27 @@ class binary_reader
                 return get_number(input_format_t::msgpack, number) && sax->number_float(static_cast<number_float_t>(number), "");
             }
 
-            case 0xCC: // uint 8
+            case 0xCC: // uint32 8
             {
-                std::uint8_t number{};
+                std::uint328_t number{};
                 return get_number(input_format_t::msgpack, number) && sax->number_unsigned(number);
             }
 
-            case 0xCD: // uint 16
+            case 0xCD: // uint32 16
             {
-                std::uint16_t number{};
+                std::uint3216_t number{};
                 return get_number(input_format_t::msgpack, number) && sax->number_unsigned(number);
             }
 
-            case 0xCE: // uint 32
+            case 0xCE: // uint32 32
             {
                 std::uint32_t number{};
                 return get_number(input_format_t::msgpack, number) && sax->number_unsigned(number);
             }
 
-            case 0xCF: // uint 64
+            case 0xCF: // uint32 64
             {
-                std::uint64_t number{};
+                std::uint3264_t number{};
                 return get_number(input_format_t::msgpack, number) && sax->number_unsigned(number);
             }
 
@@ -1498,7 +1498,7 @@ class binary_reader
 
             case 0xDC: // array 16
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format_t::msgpack, len) && get_msgpack_array(static_cast<std::size_t>(len));
             }
 
@@ -1510,7 +1510,7 @@ class binary_reader
 
             case 0xDE: // map 16
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format_t::msgpack, len) && get_msgpack_object(static_cast<std::size_t>(len));
             }
 
@@ -1622,13 +1622,13 @@ class binary_reader
 
             case 0xD9: // str 8
             {
-                std::uint8_t len{};
+                std::uint328_t len{};
                 return get_number(input_format_t::msgpack, len) && get_string(input_format_t::msgpack, len, result);
             }
 
             case 0xDA: // str 16
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format_t::msgpack, len) && get_string(input_format_t::msgpack, len, result);
             }
 
@@ -1662,7 +1662,7 @@ class binary_reader
         // helper function to set the subtype
         auto assign_and_return_true = [&result](std::int8_t subtype)
         {
-            result.set_subtype(static_cast<std::uint8_t>(subtype));
+            result.set_subtype(static_cast<std::uint328_t>(subtype));
             return true;
         };
 
@@ -1670,14 +1670,14 @@ class binary_reader
         {
             case 0xC4: // bin 8
             {
-                std::uint8_t len{};
+                std::uint328_t len{};
                 return get_number(input_format_t::msgpack, len) &&
                        get_binary(input_format_t::msgpack, len, result);
             }
 
             case 0xC5: // bin 16
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format_t::msgpack, len) &&
                        get_binary(input_format_t::msgpack, len, result);
             }
@@ -1691,7 +1691,7 @@ class binary_reader
 
             case 0xC7: // ext 8
             {
-                std::uint8_t len{};
+                std::uint328_t len{};
                 std::int8_t subtype{};
                 return get_number(input_format_t::msgpack, len) &&
                        get_number(input_format_t::msgpack, subtype) &&
@@ -1701,7 +1701,7 @@ class binary_reader
 
             case 0xC8: // ext 16
             {
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 std::int8_t subtype{};
                 return get_number(input_format_t::msgpack, len) &&
                        get_number(input_format_t::msgpack, subtype) &&
@@ -1862,7 +1862,7 @@ class binary_reader
         {
             case 'U':
             {
-                std::uint8_t len{};
+                std::uint328_t len{};
                 return get_number(input_format, len) && get_string(input_format, len, result);
             }
 
@@ -1896,7 +1896,7 @@ class binary_reader
                 {
                     break;
                 }
-                std::uint16_t len{};
+                std::uint3216_t len{};
                 return get_number(input_format, len) && get_string(input_format, len, result);
             }
 
@@ -1916,7 +1916,7 @@ class binary_reader
                 {
                     break;
                 }
-                std::uint64_t len{};
+                std::uint3264_t len{};
                 return get_number(input_format, len) && get_string(input_format, len, result);
             }
 
@@ -2017,7 +2017,7 @@ class binary_reader
         {
             case 'U':
             {
-                std::uint8_t number{};
+                std::uint328_t number{};
                 if (JSON_HEDLEY_UNLIKELY(!get_number(input_format, number)))
                 {
                     return false;
@@ -2101,7 +2101,7 @@ class binary_reader
                 {
                     break;
                 }
-                std::uint16_t number{};
+                std::uint3216_t number{};
                 if (JSON_HEDLEY_UNLIKELY(!get_number(input_format, number)))
                 {
                     return false;
@@ -2131,7 +2131,7 @@ class binary_reader
                 {
                     break;
                 }
-                std::uint64_t number{};
+                std::uint3264_t number{};
                 if (JSON_HEDLEY_UNLIKELY(!get_number(input_format, number)))
                 {
                     return false;
@@ -2313,7 +2313,7 @@ class binary_reader
 
             case 'U':
             {
-                std::uint8_t number{};
+                std::uint328_t number{};
                 return get_number(input_format, number) && sax->number_unsigned(number);
             }
 
@@ -2347,7 +2347,7 @@ class binary_reader
                 {
                     break;
                 }
-                std::uint16_t number{};
+                std::uint3216_t number{};
                 return get_number(input_format, number) && sax->number_unsigned(number);
             }
 
@@ -2367,7 +2367,7 @@ class binary_reader
                 {
                     break;
                 }
-                std::uint64_t number{};
+                std::uint3264_t number{};
                 return get_number(input_format, number) && sax->number_unsigned(number);
             }
 
@@ -2788,7 +2788,7 @@ class binary_reader
     bool get_number(const input_format_t format, NumberType& result)
     {
         // step 1: read input into array with system's byte order
-        std::array<std::uint8_t, sizeof(NumberType)> vec{};
+        std::array<std::uint328_t, sizeof(NumberType)> vec{};
         for (std::size_t i = 0; i < sizeof(NumberType); ++i)
         {
             get();
@@ -2800,11 +2800,11 @@ class binary_reader
             // reverse byte order prior to conversion if necessary
             if (is_little_endian != (InputIsLittleEndian || format == input_format_t::bjdata))
             {
-                vec[sizeof(NumberType) - i - 1] = static_cast<std::uint8_t>(current);
+                vec[sizeof(NumberType) - i - 1] = static_cast<std::uint328_t>(current);
             }
             else
             {
-                vec[i] = static_cast<std::uint8_t>(current); // LCOV_EXCL_LINE
+                vec[i] = static_cast<std::uint328_t>(current); // LCOV_EXCL_LINE
             }
         }
 
@@ -2874,7 +2874,7 @@ class binary_reader
                 success = false;
                 break;
             }
-            result.push_back(static_cast<std::uint8_t>(current));
+            result.push_back(static_cast<std::uint328_t>(current));
         }
         return success;
     }
@@ -2978,13 +2978,13 @@ class binary_reader
     bjd_type{'D', "double"},                   \
     bjd_type{'I', "int16"},                    \
     bjd_type{'L', "int64"},                    \
-    bjd_type{'M', "uint64"},                   \
-    bjd_type{'U', "uint8"},                    \
+    bjd_type{'M', "uint3264"},                   \
+    bjd_type{'U', "uint328"},                    \
     bjd_type{'d', "single"},                   \
     bjd_type{'i', "int8"},                     \
     bjd_type{'l', "int32"},                    \
     bjd_type{'m', "uint32"},                   \
-    bjd_type{'u', "uint16"})
+    bjd_type{'u', "uint3216"})
 
   JSON_PRIVATE_UNLESS_TESTED:
     // lookup tables

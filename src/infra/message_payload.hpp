@@ -12,7 +12,7 @@ enum ContentType {
 
 struct MessagePayload {
     void*       content;
-    uint        size;
+    uint32        size;
     ContentType type;
 };
 

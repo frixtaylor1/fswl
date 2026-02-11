@@ -8,7 +8,7 @@
 
 #include "../../stl/associative_container.hpp"
 
-template< uint MaxHeaders = 10 >
+template< uint32 MaxHeaders = 10 >
 using HeaderContainer = AssociativeContainer< String, String, MaxHeaders>;
 
 #endif // http_header_hpp

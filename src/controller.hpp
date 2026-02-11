@@ -1,8 +1,8 @@
 #ifndef controller_hpp
 #define controller_hpp
 
-constexpr const uint HTTP_STATUS_OK = 200;
-constexpr const uint HTTP_STATUS_BAD_REQUEST = 400;
+constexpr const uint32 HTTP_STATUS_OK = 200;
+constexpr const uint32 HTTP_STATUS_BAD_REQUEST = 400;
 
 #include "./server/interfaces/irequest.hpp"
 #include "./server/interfaces/iresponse.hpp"

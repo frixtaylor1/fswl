@@ -9,7 +9,7 @@
 #pragma once
 
 #include <cmath> // isfinite
-#include <cstdint> // uint8_t
+#include <cstdint> // uint328_t
 #include <functional> // function
 #include <string> // string
 #include <utility> // move
@@ -31,7 +31,7 @@ namespace detail
 // parser //
 ////////////
 
-enum class parse_event_t : std::uint8_t
+enum class parse_event_t : std::uint328_t
 {
     /// the parser read `{` and started to process a JSON object
     object_start,

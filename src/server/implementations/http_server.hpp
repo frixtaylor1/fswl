@@ -9,6 +9,9 @@
 #include "http_router.hpp"
 #include "http_task_queue.hpp"
 #include <string.h>
+#include <algorithm>
+#include <cctype>
+#include <exception>
 
 #include "../../stl/static_collection.hpp"
 #include "../interfaces/iserver.hpp"
@@ -28,19 +31,24 @@ struct HttpServer : implements IServer {
     pthread_t    threadPool[MAX_THREADS];
     int          threadCount;
 
-    void         init(uint port = 8081);
+    void         init(uint32 port = 8081);
     void         start(void);
     void         bindRouter(IRouter* routerImpl) {
         router = routerImpl;
     }
 
 private:
+    static constexpr size_t MAX_HEADER_BYTES  = 16 * 1024;
+    static constexpr size_t MAX_BODY_BYTES    = 1024 * 1024;
+    static constexpr size_t MAX_REQUEST_BYTES = MAX_HEADER_BYTES + MAX_BODY_BYTES;
+
     static void* workerRoutine(void* arg);
     void         handleConnection(int clientSocket);
+    void         ensureMaxRequestBytesCapacity(String &fullRequest, int clientSocket);
     void         debugRequestHeaders(String &headersPart, HttpRequest &req, String &fullRequest);
     void         parseMethodPathAndVersion(String &headersPart, HttpRequest &req);
     void         setBody(String &bodyPart, HttpRequest &req);
-    void         parseBody(int delimiterPos, uint firstDelimiterSize, String &fullRequest, String &bodyPart);
+    void         parseBody(int delimiterPos, uint32 firstDelimiterSize, String &fullRequest, String &bodyPart);
     void         cleanup();
     void         handleAcceptError(int clientSocket, int &retFlag);
     void         setupStart(sockaddr_in &serverAddr, bool &retFlag);
@@ -49,9 +57,12 @@ private:
     void         bind(sockaddr_in &serverAddr, bool &retFlag);
     void         recicleAddress();
     void         startThreadPool();
+    void         sendErrorAndClose(int clientSocket, int statusCode, const char* statusText, const char* message);
+    void         parseHeaders(String &headersPart, HttpRequest &req);
+    bool         tryParseContentLength(HttpRequest &req, size_t &contentLength);
 };
 
-void HttpServer::init(uint port) {
+void HttpServer::init(uint32 port) {
     this->port   = port;
     listenSocket = -1;
     threadCount  = MAX_THREADS;
@@ -219,30 +230,87 @@ void HttpServer::handleConnection(int clientSocket) {
     HttpResponse res;
 
     String fullRequest;
+    fullRequest.reserve(sizeof(buffer));
+
+    bool         headersComplete      = false;
+    size_t       delimiterPos         = String::npos;
+    size_t       expectedBodyBytes    = 0;
+    const char   firstDelimiter[]     = "\r\n\r\n";
+    const size_t firstDelimiterSize   = sizeof(firstDelimiter) - 1;
+    String       headersPart;
 
     while (true) {
-        int n = recv(clientSocket, buffer, sizeof(buffer), 0);
-        if (n <= 0) break;
-
-        fullRequest.append(buffer, n);
-
-        if (fullRequest.find("\r\n\r\n") != String::npos)
+        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (bytesReceived <= 0) {
             break;
+        }
+
+        fullRequest.append(buffer, bytesReceived);
+
+        try {
+            ensureMaxRequestBytesCapacity(fullRequest, clientSocket);
+        } catch (const std::exception& e) {
+            SA_PRINT_ERR("Error processing request: %s\n", e.what());
+            sendErrorAndClose(clientSocket, 413, "Payload Too Large", "Request exceeds allowed size");
+            return;
+        }
+
+        if (!headersComplete) {
+            delimiterPos = fullRequest.find(firstDelimiter);
+
+            if (delimiterPos != String::npos) {
+                headersComplete = true;
+                headersPart     = fullRequest.substr(0, delimiterPos);
+
+                parseMethodPathAndVersion(headersPart, req);
+                parseHeaders(headersPart, req);
+
+                if (req.hasHeader("transfer-encoding")) {
+                    sendErrorAndClose(clientSocket, 501, "Not Implemented", "Transfer-Encoding is not supported");
+                    return;
+                }
+
+                if (!tryParseContentLength(req, expectedBodyBytes)) {
+                    sendErrorAndClose(clientSocket, 400, "Bad Request", "Invalid Content-Length header");
+                    return;
+                }
+
+                if (expectedBodyBytes > MAX_BODY_BYTES) {
+                    sendErrorAndClose(clientSocket, 413, "Payload Too Large", "Request body exceeds allowed size");
+                    return;
+                }
+            } else if (fullRequest.size() > MAX_HEADER_BYTES) {
+                sendErrorAndClose(clientSocket, 431, "Request Header Fields Too Large", "Request headers exceed allowed size");
+                return;
+            }
+        }
+
+        if (headersComplete) {
+            size_t headerEnd           = delimiterPos + firstDelimiterSize;
+            size_t bodyBytesAvailable  = (fullRequest.size() > headerEnd) ? (fullRequest.size() - headerEnd) : 0;
+
+            if (bodyBytesAvailable >= expectedBodyBytes) {
+                break;
+            }
+        }
     }
 
-    const char firstDelimiter[5]  = "\r\n\r\n";
-    int        delimiterPos       = fullRequest.find(firstDelimiter);
-    if (delimiterPos > 0) {
-        uint      firstDelimiterSize = (uint) strlen(firstDelimiter);
-        String    headersPart        = fullRequest.substr(0, delimiterPos);
-        String bodyPart;
-
-        parseBody(delimiterPos, firstDelimiterSize, fullRequest, bodyPart);
-        setBody(bodyPart, req);
-        parseMethodPathAndVersion(headersPart, req);
-
-        debugRequestHeaders(headersPart, req, fullRequest);
+    if (!headersComplete) {
+        sendErrorAndClose(clientSocket, 400, "Bad Request", "Malformed HTTP request");
+        return;
     }
+
+    size_t requiredBytes = delimiterPos + firstDelimiterSize + expectedBodyBytes;
+    if (fullRequest.size() < requiredBytes) {
+        sendErrorAndClose(clientSocket, 400, "Bad Request", "Incomplete HTTP body");
+        return;
+    }
+
+    String bodyPart;
+    parseBody(static_cast<int>(delimiterPos), static_cast<uint32>(firstDelimiterSize), fullRequest, bodyPart);
+    setBody(bodyPart, req);
+
+    debugRequestHeaders(headersPart, req, fullRequest);
 
     router->handle(&req, &res);
     
@@ -250,6 +318,14 @@ void HttpServer::handleConnection(int clientSocket) {
     send(clientSocket, responseStr.c_str(), responseStr.length(), 0);
     
     close(clientSocket);
+}
+
+void HttpServer::ensureMaxRequestBytesCapacity(String &fullRequest, int clientSocket)
+{
+    if (fullRequest.size() > MAX_REQUEST_BYTES)
+    {
+        throw std::runtime_error("Request exceeds allowed size");
+    }
 }
 
 void HttpServer::debugRequestHeaders(String &headersPart, HttpRequest &req, String &fullRequest)
@@ -305,11 +381,83 @@ void HttpServer::setBody(String &bodyPart, HttpRequest &req) {
     }
 }
 
-void HttpServer::parseBody(int delimiterPos, uint firstDelimiterSize, String &fullRequest, String &bodyPart) {
+void HttpServer::parseBody(int delimiterPos, uint32 firstDelimiterSize, String &fullRequest, String &bodyPart) {
     if (delimiterPos + firstDelimiterSize < fullRequest.length()) {
         String rawbody = fullRequest.substr(delimiterPos + firstDelimiterSize, fullRequest.length());
         bodyPart.append(rawbody);
     }
+}
+
+void HttpServer::parseHeaders(String &headersPart, HttpRequest &req) {
+    size_t lineStart = headersPart.find("\r\n");
+    if (lineStart == String::npos) {
+        return;
+    }
+
+    lineStart += 2;
+
+    while (lineStart < headersPart.length()) {
+        size_t lineEnd = headersPart.find("\r\n", lineStart);
+        size_t length  = (lineEnd == String::npos) ? (headersPart.length() - lineStart) : (lineEnd - lineStart);
+        String line    = headersPart.substr(lineStart, length);
+        lineStart      = (lineEnd == String::npos) ? headersPart.length() : lineEnd + 2;
+
+        if (line.empty()) {
+            continue;
+        }
+
+        size_t colonPos = line.find(':');
+        if (colonPos == String::npos) {
+            continue;
+        }
+
+        String key   = line.substr(0, colonPos);
+        String value = line.substr(colonPos + 1);
+
+        trim(key);
+        trim(value);
+
+        std::transform(key.begin(), key.end(), key.begin(), [](unsigned char ch) {
+            return static_cast<char>(std::tolower(ch));
+        });
+
+        if (!key.empty()) {
+            req.addHeader(key, value);
+        }
+    }
+}
+
+bool HttpServer::tryParseContentLength(HttpRequest &req, size_t &contentLength) {
+    static const String contentLengthKey("content-length");
+
+    if (!req.hasHeader(contentLengthKey)) {
+        contentLength = 0;
+        return true;
+    }
+
+    const String& rawValue = req.get(contentLengthKey);
+    if (rawValue.empty()) {
+        return false;
+    }
+
+    try {
+        contentLength = static_cast<size_t>(std::stoull(rawValue));
+    } catch (const std::exception&) {
+        return false;
+    }
+
+    return true;
+}
+
+void HttpServer::sendErrorAndClose(int clientSocket, int statusCode, const char* statusText, const char* message) {
+    HttpResponse errRes;
+    errRes.setStatus(statusCode, statusText);
+    errRes.addHeader("Content-Type", "text/plain; charset=utf-8");
+    errRes.setBody(message);
+
+    String payload = errRes.serialize();
+    send(clientSocket, payload.c_str(), payload.length(), 0);
+    close(clientSocket);
 }
 
 #endif // http_server_hpp

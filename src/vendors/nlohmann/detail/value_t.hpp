@@ -10,7 +10,7 @@
 
 #include <array> // array
 #include <cstddef> // size_t
-#include <cstdint> // uint8_t
+#include <cstdint> // uint328_t
 #include <string> // string
 
 #include <nlohmann/detail/macro_scope.hpp>
@@ -50,7 +50,7 @@ value with the default value for a given type
 
 @since version 1.0.0
 */
-enum class value_t : std::uint8_t
+enum class value_t : std::uint328_t
 {
     null,             ///< null value
     object,           ///< object (unordered set of name/value pairs)
@@ -83,7 +83,7 @@ Returns an ordering that is similar to Python:
     inline bool operator<(const value_t lhs, const value_t rhs) noexcept
 #endif
 {
-    static constexpr std::array<std::uint8_t, 9> order = {{
+    static constexpr std::array<std::uint328_t, 9> order = {{
             0 /* null */, 3 /* object */, 4 /* array */, 5 /* string */,
             1 /* boolean */, 2 /* integer */, 2 /* unsigned */, 2 /* float */,
             6 /* binary */

@@ -14,7 +14,7 @@
 #include <clocale> // localeconv, lconv
 #include <cmath> // labs, isfinite, isnan, signbit
 #include <cstddef> // size_t, ptrdiff_t
-#include <cstdint> // uint8_t
+#include <cstdint> // uint328_t
 #include <cstdio> // snprintf
 #include <limits> // numeric_limits
 #include <string> // string, char_traits
@@ -55,8 +55,8 @@ class serializer
     using number_integer_t = typename BasicJsonType::number_integer_t;
     using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
     using binary_char_t = typename BasicJsonType::binary_t::value_type;
-    static constexpr std::uint8_t UTF8_ACCEPT = 0;
-    static constexpr std::uint8_t UTF8_REJECT = 1;
+    static constexpr std::uint328_t UTF8_ACCEPT = 0;
+    static constexpr std::uint328_t UTF8_REJECT = 1;
 
   public:
     /*!
@@ -391,7 +391,7 @@ class serializer
     void dump_escaped(const string_t& s, const bool ensure_ascii)
     {
         std::uint32_t codepoint{};
-        std::uint8_t state = UTF8_ACCEPT;
+        std::uint328_t state = UTF8_ACCEPT;
         std::size_t bytes = 0;  // number of bytes written to string_buffer
 
         // number of bytes written at the point of the last valid byte
@@ -400,7 +400,7 @@ class serializer
 
         for (std::size_t i = 0; i < s.size(); ++i)
         {
-            const auto byte = static_cast<std::uint8_t>(s[i]);
+            const auto byte = static_cast<std::uint328_t>(s[i]);
 
             switch (decode(state, codepoint, byte))
             {
@@ -467,15 +467,15 @@ class serializer
                                 {
                                     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
                                     static_cast<void>((std::snprintf)(string_buffer.data() + bytes, 7, "\\u%04x",
-                                                                      static_cast<std::uint16_t>(codepoint)));
+                                                                      static_cast<std::uint3216_t>(codepoint)));
                                     bytes += 6;
                                 }
                                 else
                                 {
                                     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
                                     static_cast<void>((std::snprintf)(string_buffer.data() + bytes, 13, "\\u%04x\\u%04x",
-                                                                      static_cast<std::uint16_t>(0xD7C0u + (codepoint >> 10u)),
-                                                                      static_cast<std::uint16_t>(0xDC00u + (codepoint & 0x3FFu))));
+                                                                      static_cast<std::uint3216_t>(0xD7C0u + (codepoint >> 10u)),
+                                                                      static_cast<std::uint3216_t>(0xDC00u + (codepoint & 0x3FFu))));
                                     bytes += 12;
                                 }
                             }
@@ -602,7 +602,7 @@ class serializer
             {
                 case error_handler_t::strict:
                 {
-                    JSON_THROW(type_error::create(316, concat("incomplete UTF-8 string; last byte: 0x", hex_bytes(static_cast<std::uint8_t>(s.back() | 0))), nullptr));
+                    JSON_THROW(type_error::create(316, concat("incomplete UTF-8 string; last byte: 0x", hex_bytes(static_cast<std::uint328_t>(s.back() | 0))), nullptr));
                 }
 
                 case error_handler_t::ignore:
@@ -674,7 +674,7 @@ class serializer
      * @param[in] byte byte to represent
      * @return representation ("00".."FF")
      */
-    static std::string hex_bytes(std::uint8_t byte)
+    static std::string hex_bytes(std::uint328_t byte)
     {
         std::string result = "FF";
         constexpr const char* nibble_to_hex = "0123456789ABCDEF";
@@ -897,9 +897,9 @@ class serializer
     @copyright Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
     @sa http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
     */
-    static std::uint8_t decode(std::uint8_t& state, std::uint32_t& codep, const std::uint8_t byte) noexcept
+    static std::uint328_t decode(std::uint328_t& state, std::uint32_t& codep, const std::uint328_t byte) noexcept
     {
-        static const std::array<std::uint8_t, 400> utf8d =
+        static const std::array<std::uint328_t, 400> utf8d =
         {
             {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00..1F
@@ -920,7 +920,7 @@ class serializer
         };
 
         JSON_ASSERT(byte < utf8d.size());
-        const std::uint8_t type = utf8d[byte];
+        const std::uint328_t type = utf8d[byte];
 
         codep = (state != UTF8_ACCEPT)
                 ? (byte & 0x3fu) | (codep << 6u)

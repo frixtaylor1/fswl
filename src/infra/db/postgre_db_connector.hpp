@@ -39,7 +39,7 @@ public:
             dbProps.user.cstr(),
             dbProps.password.cstr());
 
-        for (uint i = 0; i < DB_POOL_CAPACITY; ++i) {
+        for (uint32 i = 0; i < DB_POOL_CAPACITY; ++i) {
             PGconn *newConn = PQconnectdb(connectionStr.cstr());
             
             if (PQstatus(newConn) != CONNECTION_OK) {

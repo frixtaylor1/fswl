@@ -11,7 +11,7 @@
 interface IServer {
     virtual ~IServer() {}
     virtual void start(void) = 0;
-    virtual void init(uint port = 8081) = 0;
+    virtual void init(uint32 port = 8081) = 0;
     virtual void bindRouter(IRouter* router) = 0;
 };
 

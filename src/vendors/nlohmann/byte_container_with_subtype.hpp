@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <cstdint> // uint8_t, uint64_t
+#include <cstdint> // uint328_t, uint3264_t
 #include <tuple> // tie
 #include <utility> // move
 
@@ -23,7 +23,7 @@ class byte_container_with_subtype : public BinaryType
 {
   public:
     using container_type = BinaryType;
-    using subtype_type = std::uint64_t;
+    using subtype_type = std::uint3264_t;
 
     /// @sa https://json.nlohmann.me/api/byte_container_with_subtype/byte_container_with_subtype/
     byte_container_with_subtype() noexcept(noexcept(container_type()))

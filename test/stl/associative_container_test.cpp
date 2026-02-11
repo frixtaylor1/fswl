@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include "../../src/stl/associative_container.hpp"
-template< class Key, class Value, uint CONTAINER_CAPACITY >
+template< class Key, class Value, uint32 CONTAINER_CAPACITY >
 struct AssociativeContainerWrapper {
-    static constexpr uint CAPACITY = CONTAINER_CAPACITY;
+    static constexpr uint32 CAPACITY = CONTAINER_CAPACITY;
     using ContainerType = AssociativeContainer< Key, Value, CAPACITY >;
 };
 
@@ -12,7 +12,7 @@ template< typename T >
 class AssociativeContainerTest : public ::testing::Test {
 protected:
     using ContainerType = typename T::ContainerType;
-    static constexpr uint TEST_CAPACITY = T::CAPACITY;
+    static constexpr uint32 TEST_CAPACITY = T::CAPACITY;
 
     void SetUp() override {
     }
@@ -89,7 +89,7 @@ TYPED_TEST(AssociativeContainerTest, IteratorTest) {
     typename T::ContainerType::Iterator it;
     it.init(&container);
     
-    uint count = 0;
+    uint32 count = 0;
     
     for (it.begin(); *it.key() != *it.end().key(); it.next()) {
         ASSERT_EQ(*it.key(), expected[count].first);
@@ -104,7 +104,7 @@ TYPED_TEST(AssociativeContainerTest, CapacityLimit) {
     using T = TypeParam;
     typename T::ContainerType container;
     
-    for (uint i = 0; i < T::CAPACITY; ++i) {
+    for (uint32 i = 0; i < T::CAPACITY; ++i) {
         container.add(i, (float)i);
     }
 

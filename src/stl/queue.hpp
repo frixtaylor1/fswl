@@ -7,20 +7,20 @@
 
 #include "collection.hpp"
 
-template< class ItemType, uint CAPACITY = 128 >
+template< class ItemType, uint32 CAPACITY = 128 >
 struct Queue {
     bool     enqueue(const ItemType& item);
     ItemType dequeue(void);
-    uint     length() const;
+    uint32     length() const;
     bool     isEmpty(void);
     bool     isFull(void);
     
-    uint                             head = 0;
-    uint                             tail = 0;
+    uint32                             head = 0;
+    uint32                             tail = 0;
     Collection< ItemType, CAPACITY > items;
 };
 
-template< class ItemType, uint CAPACITY > 
+template< class ItemType, uint32 CAPACITY > 
 bool Queue< ItemType, CAPACITY >::enqueue(const ItemType& item) {
     if ((head + 1) % CAPACITY == tail) {
         return false;
@@ -35,7 +35,7 @@ bool Queue< ItemType, CAPACITY >::enqueue(const ItemType& item) {
     return true;
 }
 
-template< class ItemType, uint CAPACITY > 
+template< class ItemType, uint32 CAPACITY > 
 ItemType Queue< ItemType, CAPACITY >::dequeue(void) {
     if (items.length == 0) return {};
 
@@ -47,17 +47,17 @@ ItemType Queue< ItemType, CAPACITY >::dequeue(void) {
     return item;
 }
 
-template< class ItemType, uint CAPACITY > 
-uint Queue< ItemType, CAPACITY >::length() const {
+template< class ItemType, uint32 CAPACITY > 
+uint32 Queue< ItemType, CAPACITY >::length() const {
     return items.length;
 }
 
-template< class ItemType, uint CAPACITY > 
+template< class ItemType, uint32 CAPACITY > 
 bool Queue< ItemType, CAPACITY >::isEmpty(void) {
     return items.isEmpty();
 }
 
-template< class ItemType, uint CAPACITY > 
+template< class ItemType, uint32 CAPACITY > 
 bool Queue< ItemType, CAPACITY >::isFull(void) {
     return (head + 1) % CAPACITY == tail;
 }

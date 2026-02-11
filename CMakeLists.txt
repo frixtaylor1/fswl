@@ -106,7 +106,11 @@ target_link_libraries(${PROJECT_NAME}_tests PRIVATE
 target_include_directories(${PROJECT_NAME}_tests PRIVATE src ${PostgreSQL_INCLUDE_DIRS})
 
 enable_testing()
-add_test(NAME run_tests COMMAND ${PROJECT_NAME}_tests)
+include(GoogleTest)
+gtest_discover_tests(${PROJECT_NAME}_tests
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DISCOVERY_MODE PRE_TEST
+)
 
 # ============================================================
 # Custom Targets (GDB)

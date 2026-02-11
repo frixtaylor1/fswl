@@ -11,7 +11,7 @@
 
 #include <array> // array
 #include <cmath>   // signbit, isfinite
-#include <cstdint> // intN_t, uintN_t
+#include <cstdint> // intN_t, uint32N_t
 #include <cstring> // memcpy, memmove
 #include <limits> // numeric_limits
 #include <type_traits> // conditional
@@ -58,10 +58,10 @@ struct diyfp // f * 2^e
 {
     static constexpr int kPrecision = 64; // = q
 
-    std::uint64_t f = 0;
+    std::uint3264_t f = 0;
     int e = 0;
 
-    constexpr diyfp(std::uint64_t f_, int e_) noexcept : f(f_), e(e_) {}
+    constexpr diyfp(std::uint3264_t f_, int e_) noexcept : f(f_), e(e_) {}
 
     /*!
     @brief returns x - y
@@ -106,23 +106,23 @@ struct diyfp // f * 2^e
         //
         //   = p_lo + 2^64 p_hi
 
-        const std::uint64_t u_lo = x.f & 0xFFFFFFFFu;
-        const std::uint64_t u_hi = x.f >> 32u;
-        const std::uint64_t v_lo = y.f & 0xFFFFFFFFu;
-        const std::uint64_t v_hi = y.f >> 32u;
+        const std::uint3264_t u_lo = x.f & 0xFFFFFFFFu;
+        const std::uint3264_t u_hi = x.f >> 32u;
+        const std::uint3264_t v_lo = y.f & 0xFFFFFFFFu;
+        const std::uint3264_t v_hi = y.f >> 32u;
 
-        const std::uint64_t p0 = u_lo * v_lo;
-        const std::uint64_t p1 = u_lo * v_hi;
-        const std::uint64_t p2 = u_hi * v_lo;
-        const std::uint64_t p3 = u_hi * v_hi;
+        const std::uint3264_t p0 = u_lo * v_lo;
+        const std::uint3264_t p1 = u_lo * v_hi;
+        const std::uint3264_t p2 = u_hi * v_lo;
+        const std::uint3264_t p3 = u_hi * v_hi;
 
-        const std::uint64_t p0_hi = p0 >> 32u;
-        const std::uint64_t p1_lo = p1 & 0xFFFFFFFFu;
-        const std::uint64_t p1_hi = p1 >> 32u;
-        const std::uint64_t p2_lo = p2 & 0xFFFFFFFFu;
-        const std::uint64_t p2_hi = p2 >> 32u;
+        const std::uint3264_t p0_hi = p0 >> 32u;
+        const std::uint3264_t p1_lo = p1 & 0xFFFFFFFFu;
+        const std::uint3264_t p1_hi = p1 >> 32u;
+        const std::uint3264_t p2_lo = p2 & 0xFFFFFFFFu;
+        const std::uint3264_t p2_hi = p2 >> 32u;
 
-        std::uint64_t Q = p0_hi + p1_lo + p2_lo;
+        std::uint3264_t Q = p0_hi + p1_lo + p2_lo;
 
         // The full product might now be computed as
         //
@@ -133,9 +133,9 @@ struct diyfp // f * 2^e
         // Effectively we only need to add the highest bit in p_lo to p_hi (and
         // Q_hi + 1 does not overflow).
 
-        Q += std::uint64_t{1} << (64u - 32u - 1u); // round, ties up
+        Q += std::uint3264_t{1} << (64u - 32u - 1u); // round, ties up
 
-        const std::uint64_t h = p3 + p2_hi + p1_hi + (Q >> 32u);
+        const std::uint3264_t h = p3 + p2_hi + p1_hi + (Q >> 32u);
 
         return {h, x.e + y.e + 64};
     }
@@ -204,13 +204,13 @@ boundaries compute_boundaries(FloatType value)
     constexpr int      kPrecision = std::numeric_limits<FloatType>::digits; // = p (includes the hidden bit)
     constexpr int      kBias      = std::numeric_limits<FloatType>::max_exponent - 1 + (kPrecision - 1);
     constexpr int      kMinExp    = 1 - kBias;
-    constexpr std::uint64_t kHiddenBit = std::uint64_t{1} << (kPrecision - 1); // = 2^(p-1)
+    constexpr std::uint3264_t kHiddenBit = std::uint3264_t{1} << (kPrecision - 1); // = 2^(p-1)
 
-    using bits_type = typename std::conditional<kPrecision == 24, std::uint32_t, std::uint64_t >::type;
+    using bits_type = typename std::conditional<kPrecision == 24, std::uint32_t, std::uint3264_t >::type;
 
-    const auto bits = static_cast<std::uint64_t>(reinterpret_bits<bits_type>(value));
-    const std::uint64_t E = bits >> (kPrecision - 1);
-    const std::uint64_t F = bits & (kHiddenBit - 1);
+    const auto bits = static_cast<std::uint3264_t>(reinterpret_bits<bits_type>(value));
+    const std::uint3264_t E = bits >> (kPrecision - 1);
+    const std::uint3264_t F = bits & (kHiddenBit - 1);
 
     const bool is_denormal = E == 0;
     const diyfp v = is_denormal
@@ -313,7 +313,7 @@ constexpr int kGamma = -32;
 
 struct cached_power // c = f * 2^e ~= 10^k
 {
-    std::uint64_t f;
+    std::uint3264_t f;
     int e;
     int k;
 };
@@ -543,8 +543,8 @@ inline int find_largest_pow10(const std::uint32_t n, std::uint32_t& pow10)
     return 1;
 }
 
-inline void grisu2_round(char* buf, int len, std::uint64_t dist, std::uint64_t delta,
-                         std::uint64_t rest, std::uint64_t ten_k)
+inline void grisu2_round(char* buf, int len, std::uint3264_t dist, std::uint3264_t delta,
+                         std::uint3264_t rest, std::uint3264_t ten_k)
 {
     JSON_ASSERT(len >= 1);
     JSON_ASSERT(dist <= delta);
@@ -605,8 +605,8 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
     JSON_ASSERT(M_plus.e >= kAlpha);
     JSON_ASSERT(M_plus.e <= kGamma);
 
-    std::uint64_t delta = diyfp::sub(M_plus, M_minus).f; // (significand of (M+ - M-), implicit exponent is e)
-    std::uint64_t dist  = diyfp::sub(M_plus, w      ).f; // (significand of (M+ - w ), implicit exponent is e)
+    std::uint3264_t delta = diyfp::sub(M_plus, M_minus).f; // (significand of (M+ - M-), implicit exponent is e)
+    std::uint3264_t dist  = diyfp::sub(M_plus, w      ).f; // (significand of (M+ - w ), implicit exponent is e)
 
     // Split M+ = f * 2^e into two parts p1 and p2 (note: e < 0):
     //
@@ -615,10 +615,10 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
     //         = ((p1        ) * 2^-e + (p2        )) * 2^e
     //         = p1 + p2 * 2^e
 
-    const diyfp one(std::uint64_t{1} << -M_plus.e, M_plus.e);
+    const diyfp one(std::uint3264_t{1} << -M_plus.e, M_plus.e);
 
     auto p1 = static_cast<std::uint32_t>(M_plus.f >> -one.e); // p1 = f div 2^-e (Since -e >= 32, p1 fits into a 32-bit int.)
-    std::uint64_t p2 = M_plus.f & (one.f - 1);                    // p2 = f mod 2^-e
+    std::uint3264_t p2 = M_plus.f & (one.f - 1);                    // p2 = f mod 2^-e
 
     // 1)
     //
@@ -680,7 +680,7 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
         // Note:
         // Since rest and delta share the same exponent e, it suffices to
         // compare the significands.
-        const std::uint64_t rest = (std::uint64_t{p1} << -one.e) + p2;
+        const std::uint3264_t rest = (std::uint3264_t{p1} << -one.e) + p2;
         if (rest <= delta)
         {
             // V = buffer * 10^n, with M- <= V <= M+.
@@ -696,7 +696,7 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
             //
             //      10^n = (10^n * 2^-e) * 2^e = ulp * 2^e
             //
-            const std::uint64_t ten_n = std::uint64_t{pow10} << -one.e;
+            const std::uint3264_t ten_n = std::uint3264_t{pow10} << -one.e;
             grisu2_round(buffer, length, dist, delta, rest, ten_n);
 
             return;
@@ -758,10 +758,10 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
         //         = buffer * 10^-m + 10^-m * (1/10 * (10 * p2)                   ) * 2^e
         //         = buffer * 10^-m + 10^-m * (1/10 * ((10*p2 div 2^-e) * 2^-e + (10*p2 mod 2^-e)) * 2^e
         //
-        JSON_ASSERT(p2 <= (std::numeric_limits<std::uint64_t>::max)() / 10);
+        JSON_ASSERT(p2 <= (std::numeric_limits<std::uint3264_t>::max)() / 10);
         p2 *= 10;
-        const std::uint64_t d = p2 >> -one.e;     // d = (10 * p2) div 2^-e
-        const std::uint64_t r = p2 & (one.f - 1); // r = (10 * p2) mod 2^-e
+        const std::uint3264_t d = p2 >> -one.e;     // d = (10 * p2) div 2^-e
+        const std::uint3264_t r = p2 & (one.f - 1); // r = (10 * p2) mod 2^-e
         //
         //      M+ = buffer * 10^-m + 10^-m * (1/10 * (d * 2^-e + r) * 2^e
         //         = buffer * 10^-m + 10^-m * (1/10 * (d + r * 2^e))
@@ -801,7 +801,7 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
     //
     //      10^m * 10^-m = 1 = 2^-e * 2^e = ten_m * 2^e
     //
-    const std::uint64_t ten_m = one.f;
+    const std::uint3264_t ten_m = one.f;
     grisu2_round(buffer, length, dist, delta, p2, ten_m);
 
     // By construction this algorithm generates the shortest possible decimal

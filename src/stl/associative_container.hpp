@@ -13,7 +13,7 @@
  * This container stores key-value pairs using parallel collections.
  * Current complexity: O(n) for lookups due to linear search.
  */
-template< class KeyType, class ValueType, uint CAPACITY = 128 >
+template< class KeyType, class ValueType, uint32 CAPACITY = 128 >
 struct AssociativeContainer {
     Collection<KeyType,   CAPACITY > keys;
     Collection<ValueType, CAPACITY > values;
@@ -35,31 +35,31 @@ struct AssociativeContainer {
 
     /** Query family functions... */
     bool             exists(const KeyType& key) const;
-    const KeyType&   getKeyAt(uint idx) const;
-    KeyType&         getKeyAt(uint idx);
+    const KeyType&   getKeyAt(uint32 idx) const;
+    KeyType&         getKeyAt(uint32 idx);
     ValueType&       at(const KeyType& key);
     const ValueType& at(const KeyType& key) const;
     ValueType&       getValue(const KeyType& key);
     const ValueType& getValue(const KeyType& key) const;
-    const ValueType& getValueAt(uint idx) const;
-    ValueType&       getValueAt(uint idx);
+    const ValueType& getValueAt(uint32 idx) const;
+    ValueType&       getValueAt(uint32 idx);
     KeyType&         end(void);
-    uint             length(void) const;
+    uint32             length(void) const;
 };
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 void AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::init(AssociativeContainer< KeyType, ValueType, CAPACITY >* itsAssociativeContainer) {
     self = itsAssociativeContainer;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator& AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::begin(void) {
     currentKey   = self->keys.begin().current;
     currentValue = self->values.begin().current;
     return *this;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::end(void) {
     AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator it;
     it.currentKey   = self->keys.end().current;
@@ -68,30 +68,30 @@ AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator AssociativeContai
     return it;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 typename AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator& AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::next(void) {
     currentKey++;
     currentValue++;
     return *this;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 KeyType* AssociativeContainer<KeyType, ValueType, CAPACITY >::Iterator::key(void) {
     return currentKey;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 ValueType* AssociativeContainer< KeyType, ValueType, CAPACITY >::Iterator::value(void) {
     return currentValue;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::add(const KeyType& key, const ValueType& value) {
     int slotIdx = keys.indexOf(key);
  
     if (slotIdx == -1) {
         keys.add(key);
-        uint keyIdx = keys.indexOf(key);
+        uint32 keyIdx = keys.indexOf(key);
         values.addAt(keyIdx, value);
         slotIdx = keyIdx; 
     }
@@ -99,58 +99,58 @@ ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::add(const KeyTy
     return values.at(slotIdx);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 bool AssociativeContainer< KeyType, ValueType, CAPACITY >::exists(const KeyType& key) const {
     return keys.indexOf(key) != -1;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint idx) {
+template< class KeyType, class ValueType, uint32 CAPACITY >
+KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint32 idx) {
     return keys.at(idx);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-const KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint idx) const {
+template< class KeyType, class ValueType, uint32 CAPACITY >
+const KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getKeyAt(uint32 idx) const {
     return keys.at(idx);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::at(const KeyType& key) {
     return values.at(keys.indexOf(key));
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::at(const KeyType& key) const {
     return values.at(keys.indexOf(key));
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const KeyType& key) {
     return at(key);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValue(const KeyType& key) const {
     return at(key);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint idx) const {
+template< class KeyType, class ValueType, uint32 CAPACITY >
+const ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint32 idx) const {
     return values.at(idx);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint idx) {
+template< class KeyType, class ValueType, uint32 CAPACITY >
+ValueType& AssociativeContainer< KeyType, ValueType, CAPACITY >::getValueAt(uint32 idx) {
     return values.at(idx);
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
+template< class KeyType, class ValueType, uint32 CAPACITY >
 KeyType& AssociativeContainer< KeyType, ValueType, CAPACITY >::end(void) {
     return *keys.end().current;
 }
 
-template< class KeyType, class ValueType, uint CAPACITY >
-uint AssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) const {
+template< class KeyType, class ValueType, uint32 CAPACITY >
+uint32 AssociativeContainer< KeyType, ValueType, CAPACITY >::length(void) const {
     return keys.length;
 }
 

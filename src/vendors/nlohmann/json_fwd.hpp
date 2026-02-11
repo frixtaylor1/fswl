@@ -9,7 +9,7 @@
 #ifndef INCLUDE_NLOHMANN_JSON_FWD_HPP_
 #define INCLUDE_NLOHMANN_JSON_FWD_HPP_
 
-#include <cstdint> // int64_t, uint64_t
+#include <cstdint> // int64_t, uint3264_t
 #include <map> // map
 #include <memory> // allocator
 #include <string> // string
@@ -41,12 +41,12 @@ template<template<typename U, typename V, typename... Args> class ObjectType =
          template<typename U, typename... Args> class ArrayType = std::vector,
          class StringType = std::string, class BooleanType = bool,
          class NumberIntegerType = std::int64_t,
-         class NumberUnsignedType = std::uint64_t,
+         class NumberUnsignedType = std::uint3264_t,
          class NumberFloatType = double,
          template<typename U> class AllocatorType = std::allocator,
          template<typename T, typename SFINAE = void> class JSONSerializer =
          adl_serializer,
-         class BinaryType = std::vector<std::uint8_t>>
+         class BinaryType = std::vector<std::uint328_t>>
 class basic_json;
 
 /// @brief JSON Pointer defines a string syntax for identifying a specific value within a JSON document

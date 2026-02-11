@@ -7,6 +7,9 @@
 
 #include "common.hpp"
 
+#include <pthread.h>
+#include <cstring>
+
 #ifndef collection_hpp
 #   include "collection.hpp"
 #endif // collection_hpp
@@ -14,17 +17,17 @@
 struct PoolAllocator {
     enum { POOL_CAPACITY = 1024 * 1024 * 512 };
     Collection< char, POOL_CAPACITY > arena;
-    uint                              capacity = POOL_CAPACITY;
+    uint32                              capacity = POOL_CAPACITY;
     char*                             arenaEnd;
     pthread_mutex_t                   allocatorMutex;
 
     struct __attribute__((packed)) Header {
-        uint words: 30;
+        uint32 words: 30;
         bool alloced: 1;
         bool reserved: 1;
     };
 
-    typedef uint word_t;
+    typedef uint32 word_t;
 
     #define $header (Header*)
     #define $void   (void*)
@@ -34,27 +37,29 @@ struct PoolAllocator {
     ~PoolAllocator();
     PoolAllocator(const PoolAllocator&) = delete;
     PoolAllocator&  operator=(const PoolAllocator&) = delete;
-    void*           alloc(uint bytes);
+    void*           alloc(uint32 bytes);
     void            dealloc(void* ptr);
-    void*           realloc(void* ptr, uint newBytes);
+    void*           realloc(void* ptr, uint32 newBytes);
+    const Header*   inspectHeader(void* ptr) const;
 
 private:
-    word_t          calculateWords(uint bytes) const;
-    uint            calculateBytes(word_t words) const;
+    word_t          calculateWords(uint32 bytes) const;
+    uint32            calculateBytes(word_t words) const;
     Header*         getHeader(void* ptr) const;
     Header*         nextHeader(Header* header) const;
     bool            headerFound(Header* header, word_t requestedWords) const;
     Header*         findBlock(Header* startHeader, word_t requestedWords);
     void*           getBlockArea(Header* header) const;
     void            initializeFirstHeader(void);
+
 };
 
 
-inline PoolAllocator::word_t PoolAllocator::calculateWords(uint bytes) const {
+inline PoolAllocator::word_t PoolAllocator::calculateWords(uint32 bytes) const {
     return (bytes + 3) / 4;
 }
 
-inline uint PoolAllocator::calculateBytes(word_t words) const {
+inline uint32 PoolAllocator::calculateBytes(word_t words) const {
     return words * 4;
 }
 
@@ -90,34 +95,40 @@ inline void* PoolAllocator::getBlockArea(Header* header) const {
 }
 
 inline void PoolAllocator::initializeFirstHeader() {
-    Header* h = $header &arena.at(0);
-    
-    uint usable = capacity - sizeof(Header);
+    arena.length = capacity;
+    char*  basePtr = arena.items;
+    Header* h      = reinterpret_cast<Header*>(basePtr);
+
+    uint32 usable = capacity - sizeof(Header);
     word_t words = calculateWords(usable);
-    
-    h->words = words;
-    h->alloced = false;
+
+    h->words    = words;
+    h->alloced  = false;
     h->reserved = false;
+
+    arenaEnd = basePtr + capacity;
 }
 
 inline PoolAllocator::PoolAllocator() {
+    pthread_mutex_init(&allocatorMutex, nullptr);
     initializeFirstHeader();
-    arenaEnd = &arena.at(capacity);
 }
 
 inline PoolAllocator::~PoolAllocator() {
+    pthread_mutex_destroy(&allocatorMutex);
 }
 
-inline void* PoolAllocator::alloc(uint bytes) {
+inline void* PoolAllocator::alloc(uint32 bytes) {
     word_t requestedWords = calculateWords(bytes);
     
     pthread_mutex_lock(&allocatorMutex);
 
-    Header* header = $header &arena.at(0);
+    Header* header = reinterpret_cast<Header*>(arena.items);
 
     Header* selected = findBlock(header, requestedWords);
     
     if (!selected) {
+        pthread_mutex_unlock(&allocatorMutex);
         return nullptr;
     }
 
@@ -137,9 +148,11 @@ inline void* PoolAllocator::alloc(uint bytes) {
     selected->alloced = true;
     selected->reserved = false;
 
+    void* block = getBlockArea(selected);
+
     pthread_mutex_unlock(&allocatorMutex);
 
-    return getBlockArea(selected);
+    return block;
 }
 
 inline void PoolAllocator::dealloc(void* ptr) {
@@ -150,6 +163,7 @@ inline void PoolAllocator::dealloc(void* ptr) {
     Header* header = getHeader(ptr);
 
     SA_ASSERT(header->alloced, "Double free detected or invalid pointer!");
+    if (!header->alloced) throw std::runtime_error("Double free detected or invalid pointer!");
 
     header->alloced = false;
     header->reserved = false;
@@ -159,7 +173,7 @@ inline void PoolAllocator::dealloc(void* ptr) {
     pthread_mutex_unlock(&allocatorMutex);
 }
 
-inline void* PoolAllocator::realloc(void* ptr, uint newBytes) {
+inline void* PoolAllocator::realloc(void* ptr, uint32 newBytes) {
     if (!ptr) {
         return alloc(newBytes);
     }
@@ -174,13 +188,17 @@ inline void* PoolAllocator::realloc(void* ptr, uint newBytes) {
     }
 
     Header* oldHeader = getHeader(ptr);
-    uint    oldSize   = calculateBytes(oldHeader->words);
+    uint32    oldSize   = calculateBytes(oldHeader->words);
 
     size_t copySize = (oldSize < newBytes) ? oldSize : newBytes;
     memcpy(newPtr, ptr, copySize);
     dealloc(ptr);
 
     return newPtr;
+}
+
+inline const PoolAllocator::Header* PoolAllocator::inspectHeader(void* ptr) const {
+    return getHeader(ptr);
 }
 
 #endif // pool_allocator_hpp

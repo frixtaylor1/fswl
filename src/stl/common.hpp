@@ -19,7 +19,8 @@
 #    define SA_PRINT_ERR(...)
 #endif
 
-typedef unsigned int  uint;
+typedef unsigned char uint8;
+typedef unsigned int  uint32;
 typedef unsigned long ulong;
 typedef long long     diffptr;
 
