@@ -23,7 +23,7 @@ static bool isSpace(uint8 ch) {
     return ch == ' ';
 }
 
-void trim(String& text) {
+inline void trim(String& text) {
     auto beginIt = std::find_if_not(text.begin(), text.end(), isSpace);
     auto endIt   = std::find_if_not(text.rbegin(), text.rend(), isSpace).base();
 
