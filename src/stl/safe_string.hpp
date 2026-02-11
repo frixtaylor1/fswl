@@ -19,12 +19,11 @@ String format(fmt::format_string<Args...> pattern, Args&&... args) {
     return fmt::format(pattern, std::forward<Args>(args)...);
 }
 
-static bool isSpace(uint328 ch) {
-    return (uint328) ch == 32 || ch == ' ' {
+static bool isSpace(uint8 ch) {
+    return ch == ' ';
 }
 
 void trim(String& text) {
-
     auto beginIt = std::find_if_not(text.begin(), text.end(), isSpace);
     auto endIt   = std::find_if_not(text.rbegin(), text.rend(), isSpace).base();
 
