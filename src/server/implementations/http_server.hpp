@@ -6,6 +6,7 @@
 #define http_server_hpp
 
 #include "../../stl/common.hpp"
+#include "../../stl/safe_string.hpp"
 #include "http_router.hpp"
 #include "http_task_queue.hpp"
 
@@ -28,16 +29,17 @@ struct HttpServer : implements IServer {
 
     void         init(uint32 port = 8081);
     void         start(void);
-    void         bindRouter(IRouter* routerImpl) {
-        router = routerImpl;
-    }
+    void         bindRouter(IRouter* routerImpl);
 
+private:
     class ConnectionHandler {
     public:
         ConnectionHandler(HttpServer& server, IRouter* router, int clientSocket);
 
         void initialize();
         void handle(); 
+        
+    private:
         void finalize();
 
     private:
@@ -53,12 +55,12 @@ struct HttpServer : implements IServer {
 
         String       fullRequest;
 
-        bool         headersComplete      = false;
-        uint32       delimiterPos         = String::npos;
-        uint32       expectedBodyBytes    = 0;
-        const char*  firstDelimiter;
-        uint32       firstDelimiterSize;
-        String       headersPart;
+        bool                headersComplete   = false;
+        String::size_type   delimiterPos      = String::npos;
+        uint32              expectedBodyBytes = 0;
+        const char*         firstDelimiter;
+        String::size_type   firstDelimiterSize;
+        String              headersPart;
     };
 
 private:
@@ -72,7 +74,7 @@ private:
     void         debugRequestHeaders(String &headersPart, HttpRequest &req, String &fullRequest);
     void         parseMethodPathAndVersion(String &headersPart, HttpRequest &req);
     void         setBody(String &bodyPart, HttpRequest &req);
-    void         parseBody(int delimiterPos, uint32 firstDelimiterSize, String &fullRequest, String &bodyPart);
+    void         parseBody(String::size_type delimiterPos, String::size_type firstDelimiterSize, String &fullRequest, String &bodyPart);
     void         cleanup();
     void         handleAcceptError(int clientSocket, int &retFlag);
     void         setupStart(sockaddr_in &serverAddr, bool &retFlag);

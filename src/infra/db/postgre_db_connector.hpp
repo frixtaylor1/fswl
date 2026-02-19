@@ -32,15 +32,15 @@ public:
     void initPool(const DBProps& dbProps) override {
         currentProps = dbProps;
 
-        AnsiString< 512 > connectionStr = AnsiString< 512 >::format("host=%s port=%s dbname=%s user=%s password=%s",
-            dbProps.host.cstr(),
-            dbProps.port.cstr(),
-            dbProps.dbName.cstr(),
-            dbProps.user.cstr(),
-            dbProps.password.cstr());
+        String connectionStr = format("host={} port={} dbname={} user={} password={}",
+            dbProps.host,
+            dbProps.port,
+            dbProps.dbName,
+            dbProps.user,
+            dbProps.password);
 
         for (uint32 i = 0; i < DB_POOL_CAPACITY; ++i) {
-            PGconn *newConn = PQconnectdb(connectionStr.cstr());
+            PGconn *newConn = PQconnectdb(connectionStr.c_str());
             
             if (PQstatus(newConn) != CONNECTION_OK) {
                 PQfinish(newConn);

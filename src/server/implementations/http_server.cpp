@@ -169,7 +169,6 @@ void HttpServer::startThreadPool() {
 void HttpServer::handleConnection(int clientSocket) {
     ConnectionHandler handler(*this, router, clientSocket);
     handler.handle();
-    handler.finalize();
 }
 
 void HttpServer::ensureMaxRequestBytesCapacity(String &fullRequest, int clientSocket)
@@ -193,25 +192,24 @@ void HttpServer::debugRequestHeaders(String &headersPart, HttpRequest &req, Stri
 }
 
 Collection<String> split(const String& text, char delimiter, int limit = -1) {
-    Collection<String> result;
-    uint32 start = 0;
-    uint32 end = text.find(delimiter);
-    int count = 0;
+    Collection<String> tokens;
+    size_t start = 0;
+    size_t end = text.find(delimiter);
 
-    while (end != String::npos && (limit == -1 || count < limit)) {
-        result.add(text.substr(start, end - start));
+    while (end != String::npos) {
+        tokens.add(text.substr(start, end - start));
         start = end + 1;
         end = text.find(delimiter, start);
-        count++;
     }
+
+    tokens.add(text.substr(start, end - start));
     
-    result.add(text.substr(start));
-    return result;
+    return tokens;
 }
 
 void HttpServer::parseMethodPathAndVersion(String &headersPart, HttpRequest &req) {
     String requestLine;
-    uint32 firstLineEnd = headersPart.find("\r\n");
+    String::size_type firstLineEnd = headersPart.find("\r\n");
 
     if (firstLineEnd != String::npos) {
         requestLine = headersPart.substr(0, firstLineEnd);
@@ -233,15 +231,19 @@ void HttpServer::setBody(String &bodyPart, HttpRequest &req) {
     }
 }
 
-void HttpServer::parseBody(int delimiterPos, uint32 firstDelimiterSize, String &fullRequest, String &bodyPart) {
-    if (delimiterPos + firstDelimiterSize < fullRequest.length()) {
-        String rawbody = fullRequest.substr(delimiterPos + firstDelimiterSize, fullRequest.length());
-        bodyPart.append(rawbody);
+void HttpServer::parseBody(String::size_type delimiterPos, String::size_type firstDelimiterSize, String &fullRequest, String &bodyPart) {
+    if (delimiterPos == String::npos) {
+        return;
+    }
+
+    String::size_type bodyStart = delimiterPos + firstDelimiterSize;
+    if (bodyStart < fullRequest.length()) {
+        bodyPart.append(fullRequest.substr(bodyStart));
     }
 }
 
 void HttpServer::parseHeaders(String &headersPart, HttpRequest &req) {
-    uint32 lineStart = headersPart.find("\r\n");
+    String::size_type lineStart = headersPart.find("\r\n");
     if (lineStart == String::npos) {
         return;
     }
@@ -249,8 +251,8 @@ void HttpServer::parseHeaders(String &headersPart, HttpRequest &req) {
     lineStart += 2;
 
     while (lineStart < headersPart.length()) {
-        uint32 lineEnd = headersPart.find("\r\n", lineStart);
-        uint32 length  = (lineEnd == String::npos) ? (headersPart.length() - lineStart) : (lineEnd - lineStart);
+        String::size_type lineEnd = headersPart.find("\r\n", lineStart);
+        String::size_type length  = (lineEnd == String::npos) ? (headersPart.length() - lineStart) : (lineEnd - lineStart);
         String line    = headersPart.substr(lineStart, length);
         lineStart      = (lineEnd == String::npos) ? headersPart.length() : lineEnd + 2;
 
@@ -258,7 +260,7 @@ void HttpServer::parseHeaders(String &headersPart, HttpRequest &req) {
             continue;
         }
 
-        uint32 colonPos = line.find(':');
+        String::size_type colonPos = line.find(':');
         if (colonPos == String::npos) {
             continue;
         }
@@ -312,6 +314,10 @@ void HttpServer::sendErrorAndClose(int clientSocket, int statusCode, const char*
     close(clientSocket);
 }
 
+void HttpServer::bindRouter(IRouter* routerImpl) {
+    router = routerImpl;
+}
+
 HttpServer::ConnectionHandler::ConnectionHandler(HttpServer& server, IRouter* router, int clientSocket) : server(server), router(router), clientSocket(clientSocket) {
     initialize();
 }
@@ -319,7 +325,7 @@ HttpServer::ConnectionHandler::ConnectionHandler(HttpServer& server, IRouter* ro
 void HttpServer::ConnectionHandler::initialize() {
     fullRequest.reserve(sizeof(buffer));
     firstDelimiter = "\r\n\r\n";
-    firstDelimiterSize = sizeof(firstDelimiter) - 1;
+    firstDelimiterSize = strlen(firstDelimiter);
 }
 
 void HttpServer::ConnectionHandler::handle() {
@@ -370,14 +376,16 @@ void HttpServer::ConnectionHandler::handle() {
         }
 
         if (headersComplete) {
-            uint32 headerEnd           = delimiterPos + firstDelimiterSize;
-            uint32 bodyBytesAvailable  = (fullRequest.size() > headerEnd) ? (fullRequest.size() - headerEnd) : 0;
+            String::size_type headerEnd          = delimiterPos + firstDelimiterSize;
+            String::size_type bodyBytesAvailable = (fullRequest.size() > headerEnd) ? (fullRequest.size() - headerEnd) : 0;
 
             if (bodyBytesAvailable >= expectedBodyBytes) {
                 break;
             }
         }
     }
+
+    finalize();
 }
 
 void HttpServer::ConnectionHandler::finalize() {
@@ -386,14 +394,14 @@ void HttpServer::ConnectionHandler::finalize() {
         return;
     }
 
-    uint32 requiredBytes = delimiterPos + firstDelimiterSize + expectedBodyBytes;
+    String::size_type requiredBytes = delimiterPos + firstDelimiterSize + expectedBodyBytes;
     if (fullRequest.size() < requiredBytes) {
         server.sendErrorAndClose(clientSocket, 400, "Bad Request", "Incomplete HTTP body");
         return;
     }
 
     String bodyPart;
-    server.parseBody(static_cast<int>(delimiterPos), static_cast<uint32>(firstDelimiterSize), fullRequest, bodyPart);
+    server.parseBody(delimiterPos, firstDelimiterSize, fullRequest, bodyPart);
     server.setBody(bodyPart, req);
 
     server.debugRequestHeaders(headersPart, req, fullRequest);

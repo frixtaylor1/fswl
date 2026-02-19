@@ -11,13 +11,14 @@
 
 #include "../../stl/static_collection.hpp"
 #include "../../stl/common.hpp"
+#include "../../stl/safe_string.hpp"
 
 struct DBProps {
-    AnsiString< 64 > port;
-    AnsiString< 64 > host;
-    AnsiString< 64 > dbName;
-    AnsiString< 64 > user;
-    AnsiString< 64 > password; 
+    String port;
+    String host;
+    String dbName;
+    String user;
+    String password; 
 };
 
 interface IDBConnector {

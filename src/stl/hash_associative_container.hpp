@@ -26,14 +26,14 @@ struct HashAssociativeContainer {
     };
     
     Entry**           table;
-    uint32              entryCount;
-    uint32              bucketCount;
-    uint32              capacity;
+    uint32            entryCount;
+    uint32            bucketCount;
+    uint32            capacity;
     PoolAllocator*    allocator;
 
     struct Iterator {
         HashAssociativeContainer* self;
-        uint32                      currentBucket;
+        uint32                    currentBucket;
         Entry*                    currentEntry;
 
         void                  init(HashAssociativeContainer* container);
@@ -61,7 +61,7 @@ struct HashAssociativeContainer {
     const ValueType& getValueAt(uint32 idx) const;
     ValueType&       getValueAt(uint32 idx);
     KeyType&         end(void);
-    uint32             length(void) const;
+    uint32           length(void) const;
     
     /** Modify family functions... */
     bool             remove(const KeyType& key);
@@ -69,7 +69,7 @@ struct HashAssociativeContainer {
 
 private:
     Entry*            _findEntry(const KeyType& key) const;
-    uint32              _hash(const KeyType& key) const;
+    uint32            _hash(const KeyType& key) const;
     void              _deleteChain(Entry* entry);
 };
 
